@@ -1,66 +1,63 @@
-# Báo cáo Tiến độ Tuần 12 (Design Review Progress Report) — AlgoBloom
+# Báo cáo tiến độ T12 — AlgoBloom
 
-- **Dự án:** AlgoBloom — AI-Augmented Online Judge (SOA Gateway Orchestration)
-- **Repository:** `https://github.com/thep1ckaxe91/AlgoBloom`
-- **Giai đoạn báo cáo:** Tuần 12 — Thiết kế Kiến trúc, Hợp đồng API & Mock Server
-- **Thành viên nhóm:** Nam, Khánh, Long, Sơn
+**Mốc:** Design Review. **Cập nhật:** 24/11/2026. **Nhóm:** Nam, Khánh, Long, Sơn.
 
----
+**Repository:** [thep1ckaxe91/AlgoBloom](https://github.com/thep1ckaxe91/AlgoBloom).
 
-## 1. Công việc đã hoàn thành (Completed Work)
+## 1. Mục tiêu và phạm vi
 
-1. **Chốt Kiến trúc SOA & Quyết định Đánh đổi (`docs/adr-summary.md`, `docs/design.md`):**
-   - Hoàn thiện kiến trúc Gateway Orchestration (Option A) với 4 thành phần tách biệt (`frontend`, `services/gateway`, `services/ai-service`, `services/judge-worker`) và Redis Streams Broker.
-   - Hoàn thiện sơ đồ Resource Model, sơ đồ ERD PostgreSQL (7 bảng), bảng phân tích sự khác biệt giữa Resource Model và DB Schema, sơ đồ SOA Topology với ranh giới tin cậy và Sequence Diagram luồng tự xác minh đề + chấm bài + phân tích Big-O.
-2. **Hoàn thiện Hợp đồng API & Message Broker (`contracts/openapi.yaml`, `contracts/redis-schemas.json`):**
-   - Xây dựng đầy đủ đặc tả OpenAPI 3.0.3 cho 14 endpoints `/api/v1/*` kèm bảo mật JWT (`BearerAuth`) & `X-Internal-API-Key`, phân trang/lọc/sắp xếp, `202 Accepted` async jobs, `ETag` caching, unified error format (`400`/`401`/`403`/`404`/`422`/`429`/`500`) và payload mẫu thực tế.
-   - Đặc tả JSON Schema + ví dụ cho 4 Redis Streams (`verify_jobs`, `verify_results`, `judge_jobs`, `judge_results`).
-3. **Dựng Stack Demo Swagger UI + Prism Mock & Bộ kiểm thử Postman:**
-   - Cung cấp `docker-compose.mock.yml` chạy một lệnh ra Swagger UI (`:8080`) + Stoplight Prism 4 (`:4010`).
-   - Khởi tạo bộ Postman Collection (`tests/postman/algobloom-w12-mock.postman_collection.json`) kiểm chứng happy path và negative cases (`401`, `403`, `422`).
-4. **Chuẩn bị Tài liệu Dự án, Kế hoạch & Khung mã nguồn Tuần 13 (Premove):**
-   - Hoàn thành `README.md`, `docs/project-brief.md`, `docs/backlog-and-plan.md`, `docs/slides-outline-w12.md`.
-   - Khởi tạo khung dịch vụ sạch cho Tuần 13 (`services/gateway` + SQL migrations/seed, `services/judge-worker`, `services/ai-service/schemas`, `frontend/README.md`) và phân rã toàn bộ GitHub Issues cho Tuần 12–13.
+AlgoBloom hỗ trợ giáo viên tạo bài theo tổ hợp thuật toán và hỗ trợ học sinh phân tích mã chậm bằng gợi ý Socratic. T12 tập trung thiết kế và hợp đồng API; backend hoàn chỉnh là mục tiêu triển khai các tuần sau.
 
----
+Năm use case chính: xác thực/phân quyền; tra cứu tag và điểm yếu; sinh và kiểm chứng đề; nộp/chấm bài theo subtask; phân tích độ phức tạp theo yêu cầu. Luồng trình bày trọng tâm là giáo viên tạo đề, học sinh nộp bài rồi yêu cầu phân tích.
 
-## 2. Hạng mục đang hoàn thiện trong Thứ Ba (In-Progress / Pending before Wednesday Review)
+MVP giữ hai vai trò TEACHER/STUDENT, sinh đề và test bốn tầng, chấm C++/Python, polling job và gợi ý có cache. LSP, WebSocket, thi đấu thời gian thực và chatbot tự do nằm ngoài phạm vi. Agent loop, calibration, adaptive learning và nghiên cứu có issue riêng; không chặn nghiệm thu P0.
 
-- [ ] **Nam:** Kiểm chứng chạy thực tế `docker-compose.mock.yml` trên máy local, chụp ảnh minh chứng Swagger UI + rà soát sơ đồ Mermaid/Redis schemas qua PR.
-- [ ] **Khánh:** Rà soát đối chiếu 100% trường giữa `contracts/openapi.yaml` và `001_init.sql`, chạy Postman Collection trên Prism và ghi nhận kết quả qua PR.
-- [ ] **Long:** Chạy gọi thử `gemini-3.8-flash` thật để tinh chỉnh payload mẫu trong `openapi.yaml` và chốt ngăn xếp triển khai AI Service (Python FastAPI vs. Go) qua PR.
-- [ ] **Sơn:** Hoàn thiện 3 ảnh/file wireframe (`docs/wireframes/`) và xuất bộ 7 slide thuyết trình dựa trên `docs/slides-outline-w12.md` qua PR.
+## 2. Thiết kế và sản phẩm đã chuẩn bị
 
----
+| Nội dung | Thiết kế và bằng chứng |
+|---|---|
+| Consumers và SOA | SPA gọi Gateway qua JWT. Gateway gọi AI bằng internal API key. Judge Worker nhận/trả message qua Redis. Gateway là thành phần duy nhất sở hữu PostgreSQL; AI và Worker không truy cập DB. Xem [project brief](project-brief.md), [sơ đồ kiến trúc/sequence](design.md). |
+| Resource và dữ liệu | User, Tag, Problem, Submission, BigOAnalysis, Job và StudentWeakness được trình bày trong resource model. ERD có 7 bảng; `problem_tags` là bảng nối, `ai_cache` là dữ liệu nội bộ. Resource API không ánh xạ một-một với bảng DB. Xem [thiết kế](design.md), [migration](../services/gateway/migrations/001_init.sql). |
+| API contract | [OpenAPI 3.0.3](../contracts/openapi.yaml) có 13 public paths, 14 operations; định nghĩa input/output, status codes, lỗi thống nhất, JWT/RBAC, pagination/filter/sort và ETag ở các operation liên quan. Đây là hợp đồng, chưa là bằng chứng thực thi. |
+| Tác vụ bất đồng bộ | Generation/submission nhận `202` và job ID; consumer polling `GET /api/v1/jobs/{jobId}`. Bốn Redis Streams được mô tả trong [message schema](../contracts/redis-schemas.json). Thiết kế tránh giữ request dài; đổi lại phải quản lý job và kết quả đến trễ. |
+| Môi trường thiết kế | Có [Compose Swagger/Prism](../docker-compose.mock.yml), [Postman collection](../tests/postman/algobloom-w12-mock.postman_collection.json), khung Gateway/Judge và bốn JSON Schema AI trên main. Có cấu hình hoặc collection không đồng nghĩa đã chạy thành công. |
 
-## 3. Khó khăn / Rủi ro & Đề xuất Hỗ trợ (Blockers & Support Needed)
+API công khai dùng `/api/v1`; AI chỉ dùng nội bộ. Hướng kiểm soát lỗi gồm validation, `401/403`, lỗi nghiệp vụ và lỗi giới hạn gọi. AI dự kiến dùng bounded backoff và mock có nhãn. Cache phân tích thuộc Gateway. Các lựa chọn và trade-offs được ghi trong [ADR](adr-summary.md).
 
-- **Kỹ thuật sandbox (`cptbox` trong Docker):** Chưa chạy thử nghiệm `dmoj/judge-small` trên môi trường Linux/Docker của từng thành viên (rủi ro về `SYS_PTRACE` / cgroups v2). Nhóm đã xếp lịch spike đầu tiên cho Nam ngay sau buổi Review Thứ Tư.
-- **Giới hạn Free Tier của `gemini-3.8-flash`:** Rủi ro gặp lỗi `429` khi nhiều thành viên cùng test. Nhóm đã thiết kế cơ chế `MOCK_AI=true` + cache băm PostgreSQL để phát triển độc lập không phụ thuộc quota.
-- **Hỗ trợ cần từ Giảng viên:** Nhờ giảng viên góp ý trong buổi Design Review về ranh giới tách `Resource Model` vs `DB Schema` và thiết kế luồng `202 Accepted` polling `GET /api/v1/jobs/{jobId}` trước khi nhóm khóa hợp đồng bước vào Tuần 13.
+## 3. Tiến độ và đóng góp cá nhân
 
----
+| Thành viên | Kết quả hiện có | Còn phải xác nhận trước nghiệm thu T12 |
+|---|---|---|
+| Nam | [PR #20](https://github.com/thep1ckaxe91/AlgoBloom/pull/20) có cập nhật roadmap và tệp ảnh Swagger. | Review sơ đồ/Redis theo [#1](https://github.com/thep1ckaxe91/AlgoBloom/issues/1); đối chiếu bằng chứng mock. PR chưa merge. |
+| Khánh | Main có OpenAPI, ERD, migrations/seed và Postman collection. | [#2](https://github.com/thep1ckaxe91/AlgoBloom/issues/2): đối chiếu API/DB và kết quả chạy Postman; chưa có PR riêng/kết quả thực thi được xác nhận trong lần rà soát này. |
+| Long | [PR #23](https://github.com/thep1ckaxe91/AlgoBloom/pull/23) có thiết kế FastAPI, contract boundaries, prompt, input tổng hợp, demo script và checklist. PR sẵn sàng review; chưa merge. | [#3](https://github.com/thep1ckaxe91/AlgoBloom/issues/3): xác nhận model ID/quota, hai response API thật và schema validation; review quyết định công nghệ, rồi cập nhật examples. |
+| Sơn | [PR #27](https://github.com/thep1ckaxe91/AlgoBloom/pull/27) có project brief cập nhật, 3 wireframe SVG, slide PDF 7 trang và 6 ảnh demo mock. | Review/merge sản phẩm [#4](https://github.com/thep1ckaxe91/AlgoBloom/issues/4). PR nêu chưa chạy E2E service thật và chưa xác nhận Postman. |
 
-## 4. Kế hoạch Tuần 13 (Week 13 Implementation Plan)
+Bốn issue T12 vẫn mở tại mốc rà soát. Tài liệu trên main được đối chiếu ở commit [`9de57f3`](https://github.com/thep1ckaxe91/AlgoBloom/commit/9de57f3b3c7cd71db241d4754d153ab9a7142852). Các PR mở là đóng góp đang chờ tích hợp, không phải sản phẩm đã merge. Không quy kết toàn bộ tệp bootstrap là đóng góp cá nhân đã được nghiệm thu.
 
-| Thành viên | Công việc trọng tâm Tuần 13 | Tiêu chí hoàn thành (DoD) |
-| :--- | :--- | :--- |
-| **Khánh** | Triển khai Go Core Gateway: Auth JWT/RBAC, migrations/seed PostgreSQL, CRUD Tags/Problems/Submissions + `ETag`, `202` Job Dispatcher & Redis consumer | Server Go chạy ổn định, Postman collection chạy pass trên Gateway thật (`:8000`) |
-| **Nam** | Dựng Docker image `dmoj/judge-small` + Go Redis Streams worker cho `verify_jobs` và `judge_jobs`, đo `subtask_timings[]` | Chấm thành công 1 bài `AC` $O(N \log N)$ và 1 bài `TLE` $O(N^2)$ trong `cptbox` qua Redis Streams |
-| **Long** | Triển khai AI Service (`/internal/ai/generate-problem`, `/internal/ai/analyze-complexity`), `X-Internal-API-Key`, backoff `429`, `MOCK_AI=true` | Trả về JSON đúng schema 100% ở cả chế độ `MOCK_AI=true` và Gemini thật |
-| **Sơn** | Khởi tạo React SPA + plain `@monaco-editor/react` (no LSP), nối 3 màn hình chính với API + polling job | Demo được trọn vẹn luồng UI từ đăng nhập -> chọn tag tạo đề -> code & nộp bài -> mở drawer gợi ý Big-O |
+## 4. Demo Design Review và mức bằng chứng
 
----
+1. `POST /api/v1/problems/generate`: trình bày tags/difficulty/limits và response `202`.
+2. `GET /api/v1/jobs/{jobId}`: trình bày trạng thái và resource ID.
+3. `GET /api/v1/problems/{problemId}`: trình bày statement, ví dụ và subtask tiers.
+4. Nếu còn thời gian: nộp bài và yêu cầu phân tích; minh họa response lỗi theo OpenAPI.
 
-## 5. Minh chứng (Evidence Links)
+Ảnh Swagger nằm trong PR #20; sáu ảnh generate/poll/read/submit/result/analyze nằm trong PR #27. PR #27 báo đã thử luồng trên Swagger/Prism. Chưa có kết quả Postman được xác nhận. Mock minh họa contract, không chứng minh DB, JWT/RBAC, Redis, sandbox hoặc provider AI đã chạy. Timings và input tự soạn không được ghi là kết quả đo thật.
 
-> *Ghi chú: Các thành viên điền link commit/PR cụ thể và đính kèm ảnh chụp Swagger/Postman vào mục này trước giờ nộp Thứ Tư.*
+## 5. Việc chưa xong, rủi ro và hỗ trợ
 
-- **Repository & Bootstrap Commit:** `https://github.com/thep1ckaxe91/AlgoBloom/commits/main`
-- **GitHub Issues (Tuần 12 & 13):** `https://github.com/thep1ckaxe91/AlgoBloom/issues`
-- **PR Tuần 12 của các thành viên:**
-  - Nam (Redis Schemas & Diagrams): *(điền link PR sau khi mở)*
-  - Khánh (OpenAPI, ERD & Postman): *(điền link PR sau khi mở)*
-  - Long (Gemini Samples & AI Stack): *(điền link PR sau khi mở)*
-  - Sơn (Project Brief, Wireframes & Slides): *(điền link PR sau khi mở)*
-- **Ảnh chụp Swagger UI & Mock Response:** *(đính kèm trong `docs/evidence/` sau khi chạy `docker compose -f docker-compose.mock.yml up`)*
+| Việc cần xử lý | Người phụ trách và hành động |
+|---|---|
+| Tích hợp tài liệu T12 | Nhóm review PR #20/#23/#27, xử lý phần báo cáo trùng thay đổi trước merge; Sơn tổng hợp bộ nộp và slide. |
+| API/schema/DB consistency | Khánh hoàn tất đối chiếu, chạy collection và lưu pass/fail gắn commit; không đặt sẵn kết quả 100%. |
+| Model và quota | Long kiểm chứng API thật, lưu output đã lọc secret. Tên model trong cấu hình chưa xác nhận khả dụng; mock chỉ là phương án phát triển/demo có nhãn. |
+| Sandbox và quyền Docker | Nam thực hiện spike T13 về môi trường Judge; chưa ghi nhận đã chấm đúng chỉ từ Dockerfile. |
+| Góp ý thiết kế | Xin giảng viên phản hồi về ranh giới resource/DB, async polling và mức MVP trước khi triển khai. |
+
+## 6. Kế hoạch tiếp theo và điều kiện hoàn thành
+
+**Trước buổi T12:** review thiết kế, xác nhận demo ba operations, bổ sung API/model và Postman evidence còn thiếu; cập nhật báo cáo theo kết quả thực tế. Nộp project brief, diagrams, OpenAPI/Swagger, repository/backlog, báo cáo 1–2 trang và bộ slide 6–8 trang. Tài liệu chi tiết của Long nằm trong [bộ T12](long/t12/README.md).
+
+**T13:** Khánh triển khai auth/DB/CRUD/jobs/cache; Nam triển khai worker/sandbox; Long triển khai hai API AI, auth nội bộ, validation, retry, mock/live provider và tests; Sơn nối UI/polling. Nhóm cần demo ít nhất ba operations liên quan với DB thật và một request lỗi/không đủ quyền. JSON dựng sẵn không thay bằng chứng backend.
+
+**T14:** hoàn thành MVP, integration/regression, README và môi trường chạy lại. **T15:** security/performance evidence, lifecycle/compatibility, quickstart và release sau nghiệm thu. Mỗi kết luận hoàn thành phải gắn code, commit/PR, API response hoặc test result tương ứng.
