@@ -1,0 +1,37 @@
+{
+  "problem_title": "Longest Increasing Subsequence — synthetic design example",
+  "target_complexity": "O(N log N)",
+  "language": "cpp17",
+  "source_code": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\nint main() {\n    int n; cin >> n;\n    vector<int> a(n), dp(n, 1);\n    for (int &x : a) cin >> x;\n    int ans = 0;\n    for (int i = 0; i < n; ++i) {\n        for (int j = 0; j < i; ++j)\n            if (a[j] < a[i]) dp[i] = max(dp[i], dp[j] + 1);\n        ans = max(ans, dp[i]);\n    }\n    cout << ans << \"\\n\";\n}\n",
+  "verdict": "TLE",
+  "subtask_timings": [
+    {
+      "tier": 1,
+      "max_n": 100,
+      "status": "AC",
+      "time_ms": 1,
+      "memory_kb": 4096
+    },
+    {
+      "tier": 2,
+      "max_n": 1000,
+      "status": "AC",
+      "time_ms": 12,
+      "memory_kb": 4096
+    },
+    {
+      "tier": 3,
+      "max_n": 10000,
+      "status": "AC",
+      "time_ms": 1200,
+      "memory_kb": 4096
+    },
+    {
+      "tier": 4,
+      "max_n": 100000,
+      "status": "TLE",
+      "time_ms": 2000,
+      "memory_kb": 4096
+    }
+  ]
+}
