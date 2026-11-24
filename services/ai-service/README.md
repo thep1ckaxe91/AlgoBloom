@@ -9,7 +9,7 @@ Owner: **Long** (AI Pedagogical Service)
 - **Resilience:**
   - Exponential backoff with jitter on upstream `429 Too Many Requests` / `503`.
   - Deterministic `MOCK_AI=true` mode returning valid, realistic fixtures for local development and CI without consuming Gemini quota.
-- **Stack Flexibility (Lock in Week 12 PR):** Long may implement this service in **Python (FastAPI + Pydantic + `google-genai`)** or **Go** without altering the HTTP contract below.
+- **Stack decision (T12 PR, pending review):** Use **Python FastAPI** without altering the HTTP contract below. Dependency versions and the model-provider adapter are finalized and tested in the T13 implementation PR. See the decision record linked below.
 
 ## Internal HTTP Contract
 
@@ -30,3 +30,7 @@ Owner: **Long** (AI Pedagogical Service)
 
 ## Caching Boundary Note
 PostgreSQL hash caching (`ai_cache` keyed on `(problem_id, source_code_sha256)`) is owned and checked by **Core Gateway** (`services/gateway`) *before* calling `/internal/ai/analyze-complexity`. This keeps `services/ai-service` stateless with zero database dependencies.
+
+
+## T12 implementation stack decision (pending PR review)
+Choose **Python FastAPI** for the MVP AI Service; keep the existing internal HTTP/JSON Schema contract. See [decision record](../../docs/long/ai-service-stack-decision.md) and [four-week plan](../../docs/long/versions/README.md). Runtime/dependency pinning is implemented in T13; real model availability and payload validation remain pending under #3. This decision does not mark #3, #11 or #12 complete.
