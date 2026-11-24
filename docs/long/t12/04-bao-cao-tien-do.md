@@ -1,4 +1,4 @@
-# Bản nháp báo cáo tiến độ T12 của Long
+# Báo cáo tiến độ T12 của Long
 
 Dự án: AlgoBloom. Người phụ trách: Long (`@LongSei`). Ngày: 24/11/2026.
 
@@ -8,14 +8,14 @@ Chuẩn bị thiết kế dịch vụ AI và hợp đồng có thể triển kha
 ## 2. Phần đã chuẩn bị
 Đã xác định ranh giới AI/Gateway/Judge/Frontend. Hợp đồng hiện có gồm hai POST nội bộ cho generation và analysis, cùng endpoint health. Bốn JSON Schema mô tả request/response của hai chức năng.
 
-Đã chuẩn bị nhánh và draft PR T12–T15. Bản thiết kế T12 đề xuất Python FastAPI, giữ schema hiện có và tách model provider khỏi logic nghiệp vụ. Quyết định này còn chờ review; nó không chứng minh runtime đã hoàn thành.
+Đã chuẩn bị nhánh và PR T12–T15. Bản thiết kế T12 đề xuất Python FastAPI, giữ schema hiện có và tách model provider khỏi logic nghiệp vụ. Quyết định này còn chờ review; nó không chứng minh runtime đã hoàn thành.
 
-Trong bộ nháp T12, đã bổ sung thiết kế lỗi/retry, prompt, hai mẫu input thủ công, kịch bản demo và checklist nghiệm thu. Các phần được đưa lên nhánh T12 bằng commit riêng trong PR #23 để review; chưa là bằng chứng chạy API hoặc hoàn thành #3.
+Trong bộ tài liệu T12, đã bổ sung thiết kế lỗi/retry, prompt, hai mẫu input thủ công, kịch bản demo và checklist nghiệm thu. Các phần được đưa lên nhánh T12 bằng commit riêng trong PR #23 để review; chưa là bằng chứng chạy API hoặc hoàn thành #3.
 
 ## 3. Phần chưa hoàn thành
 Chưa có bằng chứng từ hai lần gọi model thật cho sinh bài dp + binary-search và phân tích O(N²) TLE. Chưa xác nhận model ID/quota hoặc validate response thật. Chưa thay OpenAPI examples bằng payload đã kiểm chứng.
 
-Kịch bản Swagger/Prism chưa được chạy trong đợt soạn nháp này. Chưa có ảnh demo, test report hoặc bằng chứng sandbox mới. Không ghi các nội dung này là hoàn thành.
+Kịch bản Swagger/Prism chưa được chạy trong đợt chuẩn bị này. Chưa có ảnh demo, test report hoặc bằng chứng sandbox mới. Không ghi các nội dung này là hoàn thành.
 
 ## 4. Vấn đề cần phối hợp
 Long cần môi trường API hợp lệ để kiểm chứng model. Khánh cần thống nhất error mapping, public examples và cách healthcheck dùng internal key. Nam phối hợp bước chạy generator/reference trong sandbox. Sơn tổng hợp phần AI vào slide và demo nhóm.
@@ -30,7 +30,7 @@ Triển khai nền tảng #11 và chức năng #12. Thêm auth, mock provider, s
 
 ## 7. Liên kết theo dõi
 - Issue #3: https://github.com/thep1ckaxe91/AlgoBloom/issues/3
-- Draft PR T12: https://github.com/thep1ckaxe91/AlgoBloom/pull/23
+- PR T12: https://github.com/thep1ckaxe91/AlgoBloom/pull/23
 - Epic: https://github.com/thep1ckaxe91/AlgoBloom/issues/15
 
-Các tài liệu nháp nằm trong `docs/long/t12/` của PR #23. Liên kết response thật, validation và demo sẽ bổ sung sau khi có kết quả thực thi.
+Các tài liệu nằm trong `docs/long/t12/` của PR #23. Liên kết response thật, validation và demo sẽ bổ sung sau khi có kết quả thực thi.

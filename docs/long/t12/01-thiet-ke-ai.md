@@ -1,4 +1,4 @@
-# Bản nháp thiết kế dịch vụ AI của Long
+# Thiết kế dịch vụ AI của Long
 
 Ngày: 24/11/2026. Mốc: T12. Trạng thái: đề xuất để xem xét.
 
@@ -76,7 +76,7 @@ Phân tích timings phải xét trường hợp TLE là quan sát bị chặn b�
 
 Không retry lỗi input/auth. Đề xuất hiểu MAX_RETRIES là số lần gọi lại sau lần đầu; chốt rõ trong README và tests T13. Tôn trọng Retry-After nếu hợp lệ nhưng không vượt tổng deadline.
 
-Mã lỗi nội bộ cho timeout/invalid output/upstream và mapping sang job/public error cần chốt với Khánh. Không mặc định các lỗi provider trùng mã public OpenAPI. Đây là thiết kế nháp, chưa sửa error contract.
+Mã lỗi nội bộ cho timeout/invalid output/upstream và mapping sang job/public error cần chốt với Khánh. Không mặc định các lỗi provider trùng mã public OpenAPI. Phần thiết kế này chưa thay đổi error contract hiện hành.
 
 ## 8. Các điểm cần review
 1. Chấp nhận FastAPI và cách khóa môi trường T13.

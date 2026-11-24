@@ -1,6 +1,6 @@
 # Prompt và kế hoạch kiểm chứng payload T12
 
-Trạng thái: prompt nháp và input thủ công. Chưa gửi dữ liệu tới model. Chưa có response thật.
+Trạng thái: prompt thiết kế và input thủ công. Chưa gửi dữ liệu tới model. Chưa có response thật.
 
 ## 1. Cách sử dụng
 Hai tệp JSON trong `examples/` dùng để chuẩn bị kiểm chứng #3. Tất cả source code và timings trong ví dụ phân tích đều là dữ liệu tổng hợp để thử thiết kế; không là kết quả đo của học sinh hoặc Judge Worker.
@@ -46,7 +46,7 @@ Bạn hỗ trợ người học đọc mã và số liệu chạy. Dùng input J
 | Nội dung | Trạng thái |
 |---|---|
 | Hai mẫu input | Đã soạn cục bộ |
-| Hai prompt | Bản nháp |
+| Hai prompt | Đã soạn; chưa kiểm chứng bằng model thật |
 | Gọi model thật | Chưa chạy |
 | JSON Schema validation của response thật | Chưa chạy |
 | Sandbox verification | Chưa chạy; phối hợp Nam |

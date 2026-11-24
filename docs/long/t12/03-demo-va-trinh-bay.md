@@ -1,11 +1,11 @@
 # Kịch bản demo và phần trình bày T12 của Long
 
-Trạng thái: kịch bản nháp. T12 dùng Swagger hoặc Prism mock có nhãn; chưa là demo backend hoàn chỉnh.
+Trạng thái: kịch bản Design Review T12. T12 dùng Swagger hoặc Prism mock có nhãn; chưa là demo backend hoàn chỉnh.
 
 ## 1. Chuẩn bị chung
 Nhóm chạy Swagger UI/Prism theo README hiện có và mở OpenAPI. Khánh kiểm tra public schema/auth, Sơn tổng hợp slide, Nam giải thích verification, Long trình bày AI contract.
 
-Với môi trường hiện có, Swagger UI dự kiến ở localhost:8080 và Prism ở localhost:4010 theo docker-compose.mock.yml. Cần kiểm tra thực tế trước demo; bản nháp chưa chạy môi trường.
+Với môi trường hiện có, Swagger UI dự kiến ở localhost:8080 và Prism ở localhost:4010 theo docker-compose.mock.yml. Cần kiểm tra thực tế trước demo; môi trường chưa được chạy trong lần chuẩn bị này.
 
 ## 2. Luồng tạo bài cho giáo viên
 | Bước | API operation | Điều cần chỉ ra |

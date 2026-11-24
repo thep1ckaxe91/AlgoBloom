@@ -2,7 +2,7 @@
 
 Mục tiêu trước mắt: hoàn thành thiết kế và evidence của #3. Các dòng chưa chọn chưa được xác nhận hoàn thành.
 
-## 1. Đã chuẩn bị trong bộ nháp T12
+## 1. Đã chuẩn bị trong bộ tài liệu T12
 - [x] Phân định consumer, trách nhiệm SOA và scope P0.
 - [x] Soạn đề xuất FastAPI và trade-offs.
 - [x] Soạn request examples và prompt cho hai luồng.
@@ -26,4 +26,4 @@ Mục tiêu trước mắt: hoàn thành thiết kế và evidence của #3. Cá
 ## 4. Cổng nộp bài
 Chỉ báo hoàn thành thiết kế sau khi review phù hợp. Chỉ đóng #3 khi đạt DoD issue, bao gồm evidence API thật. Mock được chấp nhận cho demo thiết kế T12 nhưng không thay DoD gọi model thật của #3.
 
-Bộ nháp được công bố theo từng commit trong PR #23 để review. Không đưa paper/PDF nguồn, bản trích xuất, ảnh nguồn hoặc thông tin bí mật vào bộ bàn giao. Việc công bố tài liệu không tự hoàn tất các hạng mục thực thi.
+Bộ tài liệu được công bố theo từng commit trong PR #23 để review. Không đưa paper/PDF nguồn, bản trích xuất, ảnh nguồn hoặc thông tin bí mật vào bộ bàn giao. Việc công bố tài liệu không tự hoàn tất các hạng mục thực thi.
