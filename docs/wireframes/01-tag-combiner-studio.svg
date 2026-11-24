@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" role="img" aria-labelledby="title description" xml:lang="vi">
+  <title id="title">AlgoBloom — Tag-Combiner Studio dành cho giáo viên</title>
+  <desc id="description">Wireframe desktop low-fidelity. Form chọn 1–4 tag theo slug, độ khó 800–3500, UUID học sinh và giới hạn thời gian, bộ nhớ tùy chọn. Cột phải minh họa phản hồi 202, polling job và trạng thái hoàn tất thay thế: Job.status COMPLETED, Job.resource_id dùng đọc Problem có status PUBLISHED. Đây là tài liệu thiết kế tĩnh.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, sans-serif; fill: #252a30; font-size: 21px; }
+      .title { font-size: 32px; font-weight: 700; }
+      .heading { font-size: 24px; font-weight: 600; }
+      .label { font-size: 20px; font-weight: 600; }
+      .small { font-size: 18px; fill: #555e68; }
+      .mono { font-family: Consolas, 'Courier New', monospace; font-size: 18px; }
+      .panel { fill: #fff; stroke: #aeb5bd; stroke-width: 1.5; }
+      .input { fill: #fafafa; stroke: #8c959f; stroke-width: 1.5; }
+      .selected { fill: #e6e9ed; stroke: #59636e; stroke-width: 1.5; }
+      .line { stroke: #d3d8de; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1040" fill="#f3f4f6"/>
+  <rect width="1600" height="82" fill="#fff"/>
+  <text x="48" y="51" class="heading">AlgoBloom</text>
+  <line x1="218" y1="24" x2="218" y2="58" class="line"/>
+  <text x="242" y="51">Problem Studio</text>
+  <rect x="1360" y="23" width="192" height="38" rx="4" class="selected"/>
+  <text x="1456" y="49" text-anchor="middle" class="label">TEACHER</text>
+  <line x1="0" y1="82" x2="1600" y2="82" class="line"/>
+
+  <text x="48" y="135" class="title">Tag-Combiner Studio</text>
+  <text x="48" y="169" class="small">Kết hợp kỹ năng để tạo đề và yêu cầu xác minh tự động trước khi xuất bản.</text>
+  <text x="1552" y="132" text-anchor="end" class="small">01 / WIREFRAME · W12</text>
+
+  <!-- Form: GenerateProblemRequest. All example slugs come from the contract. -->
+  <rect x="48" y="200" width="820" height="730" rx="6" class="panel"/>
+  <text x="76" y="242" class="heading">Cấu hình đề bài</text>
+  <text x="76" y="273" class="small">* Bắt buộc · Các trường còn lại là tùy chọn</text>
+  <line x1="76" y1="292" x2="840" y2="292" class="line"/>
+
+  <text x="76" y="328" class="label">tags *</text>
+  <text x="840" y="328" text-anchor="end" class="small">Đã chọn 2 / 4</text>
+  <text x="76" y="357" class="small">Chọn 1–4 tag; gửi giá trị slug. Danh mục: GET /api/v1/tags</text>
+  <rect x="76" y="376" width="135" height="46" rx="4" class="selected"/>
+  <text x="94" y="406" class="mono">[✓] dp</text>
+  <rect x="225" y="376" width="244" height="46" rx="4" class="selected"/>
+  <text x="243" y="406" class="mono">[✓] binary-search</text>
+  <rect x="483" y="376" width="153" height="46" rx="4" class="input"/>
+  <text x="501" y="406" class="mono">[ ] graphs</text>
+  <rect x="650" y="376" width="190" height="46" rx="4" class="input"/>
+  <text x="665" y="406" class="mono">[ ] segment-tree</text>
+
+  <text x="76" y="465" class="label">difficulty *</text>
+  <rect x="76" y="481" width="764" height="48" rx="4" class="input"/>
+  <text x="94" y="513">1600</text>
+  <text x="76" y="557" class="small">Số nguyên từ 800 đến 3500</text>
+
+  <text x="76" y="602" class="label">target_student_id</text>
+  <text x="840" y="602" text-anchor="end" class="small">Tùy chọn</text>
+  <rect x="76" y="618" width="764" height="48" rx="4" class="input"/>
+  <text x="94" y="650" class="small">Nhập UUID học sinh hoặc để trống</text>
+  <text x="76" y="695" class="small">Bổ sung ngữ cảnh điểm yếu; để trống thì không gửi trường này.</text>
+
+  <text x="76" y="739" class="label">time_limit_ms</text>
+  <text x="474" y="739" class="label">memory_limit_mb</text>
+  <rect x="76" y="755" width="366" height="48" rx="4" class="input"/>
+  <rect x="474" y="755" width="366" height="48" rx="4" class="input"/>
+  <text x="94" y="787">2000</text>
+  <text x="492" y="787">256</text>
+  <text x="76" y="832" class="small">Tùy chọn · 500–10000 · mặc định 2000</text>
+  <text x="474" y="832" class="small">Tùy chọn · 64–1024 · mặc định 256</text>
+  <rect x="76" y="858" width="270" height="48" rx="4" fill="#37414c"/>
+  <text x="211" y="890" text-anchor="middle" style="fill:#fff;font-weight:600">Generate Problem</text>
+  <text x="366" y="879" class="small">POST /api/v1/problems/generate</text>
+  <text x="366" y="904" class="small">Form minh họa trước khi gửi</text>
+
+  <!-- Alternate snapshots, not simultaneous live states or a stateful Prism demo. -->
+  <rect x="896" y="200" width="656" height="393" rx="6" class="panel"/>
+  <text x="924" y="242" class="heading">Sau khi bấm Generate Problem</text>
+  <rect x="924" y="263" width="205" height="37" rx="4" class="selected"/>
+  <text x="1026" y="289" text-anchor="middle" class="label">202 Accepted</text>
+  <text x="924" y="335" class="mono">job_id: 55555555-5555-4555-8555-555555555501</text>
+  <text x="924" y="368" class="mono">type: PROBLEM_GENERATE</text>
+  <text x="924" y="401" class="mono">status: PENDING</text>
+  <text x="924" y="434" class="mono">poll_url:</text>
+  <text x="924" y="462" class="mono">/api/v1/jobs/55555555-5555-4555-8555-555555555501</text>
+  <line x1="924" y1="481" x2="1524" y2="481" class="line"/>
+  <text x="924" y="515">Đang chờ xử lý…</text>
+  <text x="924" y="545" class="mono">GET /api/v1/jobs/{jobId}</text>
+  <text x="924" y="574" class="small">Polling khi Job.status là PENDING hoặc RUNNING.</text>
+
+  <rect x="896" y="613" width="656" height="317" rx="6" fill="#fafafa" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="7 5"/>
+  <text x="924" y="652" class="heading">Trạng thái thay thế: hoàn tất</text>
+  <text x="924" y="681" class="small">Khung này thay phần chờ khi đọc được job hoàn tất.</text>
+  <text x="924" y="718" class="mono">Job.status = COMPLETED</text>
+  <text x="924" y="748" class="mono">Job.resource_type = PROBLEM</text>
+  <text x="924" y="778" class="mono">Job.resource_id = UUID của đề được tạo</text>
+  <text x="924" y="810" class="mono">→ GET /api/v1/problems/{problemId}</text>
+  <text x="924" y="839" class="small">Dùng Job.resource_id làm problemId, rồi đọc:</text>
+  <text x="924" y="869" class="mono">Problem.status = PUBLISHED</text>
+  <text x="924" y="897" class="small">Nếu Job.status = FAILED: dừng polling,</text>
+  <text x="924" y="921" class="small">hiện error_code / error_message.</text>
+
+  <text x="48" y="969" class="small">Ghi chú thiết kế: trạng thái chờ và hoàn tất là các ảnh chụp luồng; PUBLISHED thuộc Problem, không thuộc Job.</text>
+  <text x="48" y="1000" class="small">SVG tĩnh · Client chỉ gọi Gateway · Swagger UI + Prism minh họa response Contract, không sinh đề hay xác minh thật.</text>
+</svg>

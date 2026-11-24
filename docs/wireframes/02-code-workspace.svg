@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1320" viewBox="0 0 1600 1320" role="img" aria-labelledby="title description" xml:lang="vi">
+  <title id="title">AlgoBloom — Code Workspace dành cho học sinh</title>
+  <desc id="description">Wireframe desktop low-fidelity: đề bài và editor Monaco cơ bản; phản hồi 202 cùng polling job; kết quả thay thế với verdict TLE, score 50 và bảng bốn subtask theo ví dụ OpenAPI. Job COMPLETED khác Submission TLE. Analyze Big-O chỉ được gọi khi người dùng bấm nút. Đây là tài liệu thiết kế tĩnh, không phải kết quả chấm thật.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, sans-serif; fill: #252a30; font-size: 21px; }
+      .title { font-size: 32px; font-weight: 700; }
+      .heading { font-size: 24px; font-weight: 600; }
+      .label { font-size: 20px; font-weight: 600; }
+      .small { font-size: 18px; fill: #555e68; }
+      .mono { font-family: Consolas, 'Courier New', monospace; font-size: 18px; }
+      .code { font-family: Consolas, 'Courier New', monospace; font-size: 18px; }
+      .panel { fill: #fff; stroke: #aeb5bd; stroke-width: 1.5; }
+      .input { fill: #fafafa; stroke: #8c959f; stroke-width: 1.5; }
+      .selected { fill: #e6e9ed; stroke: #59636e; stroke-width: 1.5; }
+      .line { stroke: #d3d8de; stroke-width: 1.5; }
+    </style>
+  </defs>
+  <rect width="1600" height="1320" fill="#f3f4f6"/>
+  <rect width="1600" height="82" fill="#fff"/>
+  <text x="48" y="51" class="heading">AlgoBloom</text>
+  <line x1="218" y1="24" x2="218" y2="58" class="line"/>
+  <text x="242" y="51">Code Workspace</text>
+  <rect x="1360" y="23" width="192" height="38" rx="4" class="selected"/>
+  <text x="1456" y="49" text-anchor="middle" class="label">STUDENT</text>
+  <line x1="0" y1="82" x2="1600" y2="82" class="line"/>
+  <text x="48" y="135" class="title">Code Workspace</text>
+  <text x="48" y="169" class="small">Đọc đề → viết code → nộp bài → xem kết quả → chủ động xin gợi ý</text>
+  <text x="1552" y="132" text-anchor="end" class="small">02 / WIREFRAME · W12</text>
+
+  <!-- ProblemDetail: translated summary of the contract example, no reference solution. -->
+  <rect x="48" y="200" width="728" height="500" rx="6" class="panel"/>
+  <text x="76" y="239" class="heading">A. Problem Information</text>
+  <text x="76" y="270" class="small">GET /api/v1/problems/{problemId} · Problem.status: PUBLISHED</text>
+  <line x1="76" y1="286" x2="748" y2="286" class="line"/>
+  <text x="76" y="322" class="heading">Longest Increasing Energy Chain</text>
+  <text x="76" y="352" class="small">difficulty: 1600 · time_limit_ms: 2000 · memory_limit_mb: 256</text>
+  <text x="76" y="383">Cho N nút có mức năng lượng a_i. Tìm độ dài</text>
+  <text x="76" y="411">dãy con tăng nghiêm ngặt dài nhất, giữ thứ tự ban đầu.</text>
+  <text x="76" y="447" class="label">Input / Output</text>
+  <text x="76" y="475" class="small">Dòng 1: N (1 ≤ N ≤ 10^5). Dòng 2: N số a_i (1 ≤ a_i ≤ 10^9).</text>
+  <text x="76" y="502" class="small">In một số nguyên: độ dài lớn nhất của chuỗi.</text>
+  <rect x="76" y="519" width="672" height="61" rx="4" class="input"/>
+  <text x="92" y="545" class="mono">sample_cases.input: 6 ↵ 10 9 2 5 3 7</text>
+  <text x="92" y="570" class="mono">sample_cases.output: 3</text>
+  <text x="76" y="612" class="label">Giới hạn subtask (subtask_tiers)</text>
+  <text x="76" y="641" class="small">tier: 1 / 2 / 3 / 4 · max_n: 100 / 1000 / 10000 / 100000</text>
+  <text x="76" y="670" class="small">Mỗi tầng: points = 25, time_limit_ms = 2000</text>
+
+  <!-- CreateSubmissionRequest: problem_id is taken from the current Problem.id. -->
+  <rect x="800" y="200" width="752" height="500" rx="6" class="panel"/>
+  <text x="828" y="239" class="heading">B. Code Editor</text>
+  <text x="828" y="270" class="small">Plain Monaco · Không LSP / autocomplete ngữ nghĩa</text>
+  <text x="828" y="309" class="label">language</text>
+  <rect x="952" y="285" width="116" height="36" rx="4" class="input"/>
+  <text x="1010" y="310" text-anchor="middle" class="mono">cpp17</text>
+  <rect x="1080" y="285" width="116" height="36" rx="4" class="selected"/>
+  <text x="1138" y="310" text-anchor="middle" class="mono">cpp20 ✓</text>
+  <rect x="1208" y="285" width="136" height="36" rx="4" class="input"/>
+  <text x="1276" y="310" text-anchor="middle" class="mono">python3</text>
+  <text x="828" y="350" class="label">source_code</text>
+  <text x="1524" y="350" text-anchor="end" class="small">1–65536 ký tự</text>
+  <rect x="828" y="365" width="696" height="234" rx="4" class="input"/>
+  <g xml:space="preserve">
+    <text x="844" y="391" class="code">#include &lt;bits/stdc++.h&gt;</text>
+    <text x="844" y="413" class="code">using namespace std;</text>
+    <text x="844" y="435" class="code">int main() { int n; cin &gt;&gt; n;</text>
+    <text x="844" y="457" class="code">  vector&lt;int&gt; a(n), dp(n, 1);</text>
+    <text x="844" y="479" class="code">  for (int i=0; i&lt;n; ++i) cin &gt;&gt; a[i];</text>
+    <text x="844" y="501" class="code">  int ans=0; for (int i=0; i&lt;n; ++i) {</text>
+    <text x="844" y="523" class="code">    for (int j=0; j&lt;i; ++j) if (a[j]&lt;a[i])</text>
+    <text x="844" y="545" class="code">      dp[i]=max(dp[i], dp[j]+1);</text>
+    <text x="844" y="567" class="code">    ans=max(ans, dp[i]); } cout &lt;&lt; ans &lt;&lt; "\n";</text>
+    <text x="844" y="589" class="code">}</text>
+  </g>
+  <rect x="828" y="616" width="206" height="47" rx="4" fill="#37414c"/>
+  <text x="931" y="647" text-anchor="middle" style="fill:#fff;font-weight:600">Submit Code</text>
+  <text x="1056" y="636" class="small">POST /api/v1/submissions</text>
+  <text x="1056" y="660" class="small">problem_id = Problem.id đang mở</text>
+  <text x="828" y="687" class="small">Code mẫu từ Contract, thu gọn cách trình bày; không phải lời giải chuẩn.</text>
+
+  <!-- Pending snapshot. Values are from the POST /submissions 202 example. -->
+  <rect x="48" y="720" width="1504" height="220" rx="6" class="panel"/>
+  <text x="76" y="758" class="heading">C. Submission &amp; Job Status · Sau khi bấm Submit Code</text>
+  <rect x="1320" y="735" width="204" height="35" rx="4" class="selected"/>
+  <text x="1422" y="760" text-anchor="middle" class="label">202 Accepted</text>
+  <text x="76" y="796" class="mono">job_id: 55555555-5555-4555-8555-555555555502</text>
+  <text x="76" y="826" class="mono">submission_id: 44444444-4444-4444-8444-444444444401</text>
+  <text x="76" y="856" class="mono">type: SUBMISSION_JUDGE · status: PENDING</text>
+  <text x="76" y="886" class="mono">poll_url:</text>
+  <text x="76" y="915" class="mono">/api/v1/jobs/55555555-5555-4555-8555-555555555502</text>
+  <line x1="800" y1="784" x2="800" y2="918" class="line"/>
+  <text x="828" y="796">Đang chờ chấm…</text>
+  <text x="828" y="826" class="mono">GET /api/v1/jobs/{jobId}</text>
+  <text x="828" y="856" class="small">Polling khi Job.status = PENDING / RUNNING.</text>
+  <text x="828" y="886" class="small">COMPLETED → đọc chi tiết submission; dừng polling.</text>
+  <text x="828" y="915" class="small">FAILED → dừng polling, hiện error_code / error_message.</text>
+
+  <!-- Alternative to C: designed completed-job flow, not an added Prism job example. -->
+  <rect x="48" y="960" width="1504" height="260" rx="6" fill="#fafafa" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="7 5"/>
+  <text x="76" y="996" class="heading">D. Judge Results · Trạng thái thay thế khi Job.status = COMPLETED</text>
+  <text x="76" y="1025" class="small">GET /api/v1/submissions/{submissionId} · Submission.status: TLE · score: 50 / 100</text>
+  <text x="76" y="1053" class="small">Job hoàn tất xử lý ≠ bài nộp AC. Bảng dưới là status riêng từng phần tử subtask_timings[].</text>
+  <rect x="76" y="1069" width="1040" height="133" fill="#fff" stroke="#aeb5bd"/>
+  <rect x="76" y="1069" width="1040" height="29" fill="#e6e9ed"/>
+  <path d="M76 1098H1116 M76 1124H1116 M76 1150H1116 M76 1176H1116 M160 1069V1202 M310 1069V1202 M440 1069V1202 M580 1069V1202 M750 1069V1202 M940 1069V1202" fill="none" class="line"/>
+  <g class="table-head">
+    <text x="92" y="1090" class="mono">tier</text>
+    <text x="180" y="1090" class="mono">max_n</text>
+    <text x="330" y="1090" class="mono">status</text>
+    <text x="460" y="1090" class="mono">time_ms</text>
+    <text x="600" y="1090" class="mono">memory_kb</text>
+    <text x="770" y="1090" class="mono">passed_cases</text>
+    <text x="960" y="1090" class="mono">total_cases</text>
+  </g>
+  <g id="subtask-1" data-contract-tier="1">
+    <text x="92" y="1118" class="mono">1</text><text x="180" y="1118" class="mono">100</text><text x="330" y="1118" class="mono">AC</text><text x="460" y="1118" class="mono">4</text><text x="600" y="1118" class="mono">3200</text><text x="770" y="1118" class="mono">5</text><text x="960" y="1118" class="mono">5</text>
+  </g>
+  <g id="subtask-2" data-contract-tier="2">
+    <text x="92" y="1144" class="mono">2</text><text x="180" y="1144" class="mono">1000</text><text x="330" y="1144" class="mono">AC</text><text x="460" y="1144" class="mono">48</text><text x="600" y="1144" class="mono">3456</text><text x="770" y="1144" class="mono">5</text><text x="960" y="1144" class="mono">5</text>
+  </g>
+  <g id="subtask-3" data-contract-tier="3">
+    <text x="92" y="1170" class="mono">3</text><text x="180" y="1170" class="mono">10000</text><text x="330" y="1170" class="mono">TLE</text><text x="460" y="1170" class="mono">2001</text><text x="600" y="1170" class="mono">4096</text><text x="770" y="1170" class="mono">0</text><text x="960" y="1170" class="mono">5</text>
+  </g>
+  <g id="subtask-4" data-contract-tier="4">
+    <text x="92" y="1196" class="mono">4</text><text x="180" y="1196" class="mono">100000</text><text x="330" y="1196" class="mono">TLE</text><text x="460" y="1196" class="mono">2001</text><text x="600" y="1196" class="mono">4096</text><text x="770" y="1196" class="mono">0</text><text x="960" y="1196" class="mono">5</text>
+  </g>
+  <rect x="1144" y="1069" width="380" height="45" rx="4" fill="#37414c"/>
+  <text x="1334" y="1099" text-anchor="middle" style="fill:#fff;font-weight:600">Analyze Big-O</text>
+  <text x="1144" y="1140" class="small">Chỉ khi bấm → POST</text>
+  <text x="1144" y="1166" class="mono">/api/v1/submissions/</text>
+  <text x="1144" y="1192" class="mono">{submissionId}/analyze</text>
+
+  <text x="48" y="1249" class="small">C và D là trạng thái thay thế. Không tự phân tích khi viết/nộp code; Drawer được thiết kế riêng ở Wireframe 3.</text>
+  <text x="48" y="1275" class="small">SVG tĩnh · Client chỉ gọi Gateway · Số liệu là ví dụ Contract; Prism không chấm thật hay mô phỏng chuyển trạng thái job.</text>
+</svg>

@@ -21,6 +21,12 @@
 4. **Chuẩn bị Tài liệu Dự án, Kế hoạch & Khung mã nguồn Tuần 13 (Premove):**
    - Hoàn thành `README.md`, `docs/project-brief.md`, `docs/backlog-and-plan.md`, `docs/slides-outline-w12.md`.
    - Khởi tạo khung dịch vụ sạch cho Tuần 13 (`services/gateway` + SQL migrations/seed, `services/judge-worker`, `services/ai-service/schemas`, `frontend/README.md`) và phân rã toàn bộ GitHub Issues cho Tuần 12–13.
+5. **Sơn — Hoàn thiện sản phẩm Design Review (Issue #4):**
+   - Rà soát, tinh gọn `docs/project-brief.md` trong giới hạn 1–2 trang; làm rõ MVP và Out-of-Scope.
+   - Hoàn thiện 3 wireframe SVG trong `docs/wireframes/`: Tag-Combiner Studio, Code Workspace, Big-O Hint Drawer; đối chiếu OpenAPI Contract, Big-O theo yêu cầu (on-demand), không tích hợp LSP.
+   - Xuất bộ 7 slide theo nội dung **gốc** của `docs/slides-outline-w12.md`, bàn giao bản PDF tại `docs/presentation/AlgoBloom_W12_Slide.pdf`; không sửa dàn ý gốc.
+   - Trực tiếp thử luồng demo trên Swagger UI + Prism: không có token nhận `401`; tạo đề `202`; GET Job `200`; GET Problem `200`; nộp bài `202`; GET Submission `200` với `TLE` và 50/100 điểm, đủ 4 Subtask; phân tích Big-O `200` với `O(N²)` so với `O(N log N)` và gợi ý Socratic. Đã lưu 6 ảnh minh chứng ở `docs/evidence/`.
+   - **Phạm vi xác nhận:** Đây là thử nghiệm Contract/Mock, không phải kiểm thử E2E trên Gateway/Judge/AI thật; chưa xác nhận Postman chạy PASS.
 
 ---
 
@@ -29,7 +35,8 @@
 - [ ] **Nam:** Kiểm chứng chạy thực tế `docker-compose.mock.yml` trên máy local, chụp ảnh minh chứng Swagger UI + rà soát sơ đồ Mermaid/Redis schemas qua PR.
 - [ ] **Khánh:** Rà soát đối chiếu 100% trường giữa `contracts/openapi.yaml` và `001_init.sql`, chạy Postman Collection trên Prism và ghi nhận kết quả qua PR.
 - [ ] **Long:** Chạy gọi thử `gemini-3.8-flash` thật để tinh chỉnh payload mẫu trong `openapi.yaml` và chốt ngăn xếp triển khai AI Service (Python FastAPI vs. Go) qua PR.
-- [ ] **Sơn:** Hoàn thiện 3 ảnh/file wireframe (`docs/wireframes/`) và xuất bộ 7 slide thuyết trình dựa trên `docs/slides-outline-w12.md` qua PR.
+- [x] **Sơn:** Đã hoàn thiện 3 wireframe, Project Brief, bộ slide PDF 7 trang theo dàn ý gốc và minh chứng Swagger UI + Prism; đã commit `b2b0aaa`, push lên fork và mở PR vào repository nhóm.
+- [ ] **Sơn (chờ review):** PR đã mở nhưng còn yêu cầu ít nhất một approving review từ người có quyền Write; chưa merge vào `main`.
 
 ---
 
@@ -62,5 +69,7 @@
   - Nam (Redis Schemas & Diagrams): *(điền link PR sau khi mở)*
   - Khánh (OpenAPI, ERD & Postman): *(điền link PR sau khi mở)*
   - Long (Gemini Samples & AI Stack): *(điền link PR sau khi mở)*
-  - Sơn (Project Brief, Wireframes & Slides): *(điền link PR sau khi mở)*
+  - Sơn (Project Brief, Wireframes & Slides): https://github.com/thep1ckaxe91/AlgoBloom/pull/27
+    - [Project Brief](project-brief.md); [Tag-Combiner Studio](wireframes/01-tag-combiner-studio.svg); [Code Workspace](wireframes/02-code-workspace.svg); [Big-O Hint Drawer](wireframes/03-big-o-hint-drawer.svg); [Slide PDF 7 trang](presentation/AlgoBloom_W12_Slide.pdf).
+    - Ảnh mock: [Generate 202](evidence/01-generate-problem.png), [Job 200](evidence/02-job-polling.png), [Problem 200](evidence/03-get-problem.png), [Submit 202](evidence/04-submit-code.png), [Submission Result 200](evidence/05-submission-result.png), [Big-O Analyze 200](evidence/06-big-o-analysis.png).
 - **Ảnh chụp Swagger UI & Mock Response:** *(đính kèm trong `docs/evidence/` sau khi chạy `docker compose -f docker-compose.mock.yml up`)*

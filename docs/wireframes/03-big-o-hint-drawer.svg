@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1320" viewBox="0 0 1600 1320" role="img" aria-labelledby="title description" xml:lang="vi">
+  <title id="title">AlgoBloom — Big-O Hint Drawer dành cho học sinh</title>
+  <desc id="description">Wireframe low-fidelity: Code Workspace ở nền, Drawer mở bên phải sau khi học sinh bấm Analyze Big-O tại kết quả bài nộp. Kết quả 200 hiển thị đủ bảy trường BigOAnalysisResponse. Loading và lỗi 429 là trạng thái thay thế cho phần kết quả, không phải API mới. Không tự gọi phân tích, không có chatbot hoặc code lời giải chuẩn. Dữ liệu dựa trên example OpenAPI.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, sans-serif; fill: #252a30; font-size: 21px; }
+      .title { font-size: 32px; font-weight: 700; }
+      .heading { font-size: 24px; font-weight: 600; }
+      .label { font-size: 20px; font-weight: 600; }
+      .small { font-size: 18px; fill: #555e68; }
+      .mono { font-family: Consolas, 'Courier New', monospace; font-size: 18px; }
+      .panel { fill: #fff; stroke: #aeb5bd; stroke-width: 1.5; }
+      .input { fill: #fafafa; stroke: #8c959f; stroke-width: 1.5; }
+      .selected { fill: #e6e9ed; stroke: #59636e; stroke-width: 1.5; }
+      .line { stroke: #d3d8de; stroke-width: 1.5; }
+      .alternate { fill: #fafafa; stroke: #8c959f; stroke-width: 1.5; stroke-dasharray: 7 5; }
+    </style>
+  </defs>
+  <rect width="1600" height="1320" fill="#f3f4f6"/>
+  <rect width="1600" height="82" fill="#fff"/>
+  <text x="48" y="51" class="heading">AlgoBloom</text>
+  <line x1="218" y1="24" x2="218" y2="58" class="line"/>
+  <text x="242" y="51">Code Workspace</text>
+  <rect x="1360" y="23" width="192" height="38" rx="4" class="selected"/>
+  <text x="1456" y="49" text-anchor="middle" class="label">STUDENT</text>
+  <line x1="0" y1="82" x2="1600" y2="82" class="line"/>
+  <text x="48" y="135" class="title">Big-O Hint Drawer</text>
+  <text x="48" y="169" class="small">On-demand · Một yêu cầu phân tích, không phải hội thoại nhiều lượt</text>
+  <text x="1552" y="132" text-anchor="end" class="small">03 / WIREFRAME · W12</text>
+
+  <!-- Workspace context is dimmed; the action is repeated clearly for this design review. -->
+  <g opacity="0.6">
+    <rect x="48" y="200" width="1504" height="610" rx="6" class="panel"/>
+    <text x="76" y="240" class="heading">Code Workspace · Nền phía sau Drawer</text>
+    <text x="76" y="279" class="label">Longest Increasing Energy Chain</text>
+    <text x="76" y="311" class="small">Tìm độ dài dãy con tăng nghiêm ngặt dài nhất.</text>
+    <text x="76" y="342" class="small">difficulty: 1600 · 2000 ms · 256 MB</text>
+    <line x1="76" y1="364" x2="648" y2="364" class="line"/>
+    <text x="76" y="405" class="label">Code Editor · cpp20</text>
+    <rect x="76" y="426" width="572" height="177" rx="4" class="input"/>
+    <text x="94" y="459" class="mono">source_code: lời giải O(N^2) đã nộp</text>
+    <text x="94" y="493" class="small">Plain Monaco · Không LSP</text>
+    <line x1="94" y1="525" x2="610" y2="525" class="line"/>
+    <line x1="94" y1="551" x2="550" y2="551" class="line"/>
+    <line x1="94" y1="577" x2="585" y2="577" class="line"/>
+  </g>
+  <text x="76" y="643" class="heading">A. Kết quả bài nộp → chủ động xin gợi ý</text>
+  <text x="76" y="676" class="small">Submission.status: TLE · score: 50 / 100</text>
+  <rect x="76" y="696" width="250" height="47" rx="4" fill="#37414c"/>
+  <text x="201" y="727" text-anchor="middle" style="fill:#fff;font-weight:600">Analyze Big-O</text>
+  <path d="M342 719H683 M673 711L683 719L673 727" fill="none" stroke="#59636e" stroke-width="2"/>
+  <text x="76" y="775" class="small">Chỉ bấm nút mới mở Drawer và gửi yêu cầu.</text>
+  <text x="76" y="800" class="small">Không tự phân tích khi gõ code hoặc vừa Submit.</text>
+
+  <!-- Loading and failure are alternate drawer-body snapshots, not additional endpoints. -->
+  <rect x="48" y="832" width="624" height="162" rx="6" class="alternate"/>
+  <text x="76" y="868" class="heading">B. Thay phần kết quả: loading</text>
+  <circle cx="88" cy="905" r="11" fill="none" stroke="#59636e" stroke-width="3" stroke-dasharray="44 26"/>
+  <text x="112" y="912">Đang phân tích…</text>
+  <text x="76" y="945" class="small">Client đang chờ response của cùng POST /analyze.</text>
+  <text x="76" y="974" class="small">Trạng thái UI; không tạo job hoặc endpoint polling mới.</text>
+
+  <rect x="48" y="1014" width="624" height="186" rx="6" class="alternate"/>
+  <text x="76" y="1050" class="heading">F. Thay phần kết quả: lỗi phân tích</text>
+  <text x="76" y="1082" class="mono">HTTP 429 · error.code: RATE_LIMITED</text>
+  <text x="76" y="1111" class="small">error.message: vượt hạn mức AI hoặc tần suất yêu cầu.</text>
+  <text x="76" y="1140" class="mono">error.request_id: req-9a8b7c6d-1006</text>
+  <text x="76" y="1179" class="small">Thông báo lỗi theo Contract; không tự gửi lại yêu cầu.</text>
+
+  <!-- Open right-side drawer: the success body uses all BigOAnalysisResponse fields. -->
+  <rect x="696" y="200" width="8" height="1000" fill="#d3d8de"/>
+  <rect x="704" y="200" width="848" height="1000" rx="6" class="panel"/>
+  <text x="732" y="244" class="heading">C. Phân tích Big-O &amp; gợi ý</text>
+  <rect x="1458" y="218" width="66" height="36" rx="4" class="input"/>
+  <text x="1491" y="244" text-anchor="middle" class="small">Đóng</text>
+  <text x="732" y="282" class="mono">POST /api/v1/submissions/{submissionId}/analyze</text>
+  <text x="732" y="311" class="small">200 OK · Không có request body · JWT Bearer qua Gateway</text>
+  <line x1="732" y1="328" x2="1524" y2="328" class="line"/>
+  <text x="732" y="358" class="label">submission_id</text>
+  <text x="732" y="386" class="mono">44444444-4444-4444-8444-444444444401</text>
+
+  <rect x="732" y="407" width="384" height="84" rx="4" class="selected"/>
+  <rect x="1136" y="407" width="388" height="84" rx="4" class="input"/>
+  <text x="750" y="437" class="mono">detected_complexity</text>
+  <text x="750" y="474" class="heading">O(N^2)</text>
+  <text x="1154" y="437" class="mono">target_complexity</text>
+  <text x="1154" y="474" class="heading">O(N log N)</text>
+
+  <text x="732" y="529" class="label">bottleneck_summary</text>
+  <text x="732" y="561">Thời gian tăng ~12×: N=100 → 4 ms; N=1000 → 48 ms.</text>
+  <text x="732" y="590">Chạm ngưỡng TLE 2000 ms tại N=10000.</text>
+  <text x="732" y="619">Chuyển trạng thái DP hai vòng lặp cần ~N^2 / 2 phép so sánh.</text>
+
+  <rect x="732" y="643" width="792" height="174" rx="4" class="input"/>
+  <text x="750" y="675" class="label">D. socratic_hint</text>
+  <text x="750" y="709">Thay vì duyệt mọi j trước i để tìm dp[j] tốt nhất,</text>
+  <text x="750" y="738">hãy theo dõi giá trị đuôi nhỏ nhất cho mỗi độ dài L.</text>
+  <text x="750" y="767">Mảng đuôi này luôn có thứ tự: phép tìm kiếm nào</text>
+  <text x="750" y="796">giúp cập nhật trong O(log N) cho mỗi phần tử?</text>
+
+  <text x="732" y="854" class="label">guiding_questions[]</text>
+  <text x="732" y="887">1. Vì sao lưu tails[len] là giá trị kết thúc nhỏ nhất</text>
+  <text x="756" y="916">của dãy tăng độ dài len lại bảo toàn tính đơn điệu?</text>
+  <text x="732" y="954">2. std::lower_bound hay std::upper_bound</text>
+  <text x="756" y="983">đảm bảo điều kiện tăng nghiêm ngặt?</text>
+
+  <line x1="732" y1="1007" x2="1524" y2="1007" class="line"/>
+  <text x="732" y="1044" class="label">E. Cache</text>
+  <rect x="888" y="1019" width="230" height="37" rx="4" class="selected"/>
+  <text x="1003" y="1045" text-anchor="middle" class="mono">cached: false</text>
+  <text x="732" y="1084" class="small">Theo example hiện có. cached = true nghĩa là Gateway trả từ cache.</text>
+  <text x="732" y="1113" class="small">Prism không tự đổi cờ cache khi gọi lại.</text>
+  <text x="732" y="1152" class="small">Nội dung gợi ý được tóm dịch từ example Contract.</text>
+  <text x="732" y="1181" class="small">Không hiển thị mã nguồn lời giải chuẩn.</text>
+
+  <text x="48" y="1240" class="small">Luồng thiết kế SOA: Student → Client SPA → API Gateway → Cache (hit) / AI Service (miss) → Response.</text>
+  <text x="48" y="1270" class="small">Client chỉ gọi Gateway qua /api/v1/*, không gọi AI trực tiếp. Loading, kết quả và lỗi là trạng thái thay thế của Drawer.</text>
+  <text x="48" y="1300" class="small">SVG tĩnh · Swagger UI + Prism chỉ minh họa response Contract, không chứng minh xử lý AI hay cache thật.</text>
+</svg>
