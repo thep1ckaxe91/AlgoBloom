@@ -1,6 +1,6 @@
 # Tài liệu Thiết kế Hệ thống (Design Document) — AlgoBloom
 
-Tài liệu này mô tả chi tiết mô hình tài nguyên REST, sơ đồ cơ sở dữ liệu PostgreSQL, sự tách biệt giữa Resource Model và Database Schema, kiến trúc SOA (Gateway Orchestration), luồng tuần tự trọng tâm và chiến lược kiểm thử của **AlgoBloom**.
+Tài liệu này mô tả chi tiết mô hình tài nguyên REST, sơ đồ cơ sở dữ liệu PostgreSQL, sự tách biệt giữa Resource Model và Database Schema, kiến trúc SOA (Gateway Orchestration), luồng tuần tự có **WASM Syntax Gate + Client Formatter + Server-side Canonical Hash / `singleflight` / CE Gate**, và chiến lược kiểm thử của **AlgoBloom**.
 
 ---
 
@@ -8,11 +8,11 @@ Tài liệu này mô tả chi tiết mô hình tài nguyên REST, sơ đồ cơ 
 
 ### 1.1 Quy ước Đặt tên & Định danh
 - **Base path:** `/api/v1`
-- **Tên tài nguyên:** Danh từ số nhiều, chữ thường, phân cách bằng dấu gạch ngang (`kebab-case`) cho đường dẫn: `/problems`, `/submissions`, `/tags`, `/jobs`, `/students/{studentId}/weaknesses`.
+- **Tên tài nguyên:** Danh từ số nhiều, chữ thường, `kebab-case` cho đường dẫn: `/problems`, `/submissions`, `/tags`, `/jobs`, `/students/{studentId}/weaknesses`.
 - **Trường JSON:** `snake_case` thống nhất toàn hệ thống (OpenAPI, PostgreSQL, Redis Streams, AI Service).
-- **Định danh (Identifiers):** Tất cả thực thể chính sử dụng **UUID v4** (`string`, format `uuid`) để tránh lộ quy mô dữ liệu và hỗ trợ tạo ID không xung đột giữa các dịch vụ.
-- **Caching:** Các endpoint đọc tài nguyên bất biến hoặc ít thay đổi (`GET /api/v1/problems/{problemId}`, `GET /api/v1/submissions/{submissionId}`) trả về weak `ETag` (ví dụ `W/"problem-<uuid>-v1"`) và hỗ trợ `If-None-Match` -> `304 Not Modified`.
-- **Tác vụ bất đồng bộ:** Các thao tác tốn thời gian (`POST /api/v1/problems/generate`, `POST /api/v1/submissions`) trả về `202 Accepted` kèm `job_id` để client polling tại `GET /api/v1/jobs/{jobId}`.
+- **Định danh (Identifiers):** UUID v4 (`string`, format `uuid`).
+- **Caching:** `GET /api/v1/problems/{problemId}` và `GET /api/v1/submissions/{submissionId}` trả về weak `ETag` (`W/"problem-<uuid>-v1"`) hỗ trợ `If-None-Match` -> `304 Not Modified`.
+- **Tác vụ bất đồng bộ:** `POST /api/v1/problems/generate` và `POST /api/v1/submissions` trả về `202 Accepted` kèm `job_id` để client polling tại `GET /api/v1/jobs/{jobId}`.
 
 ### 1.2 Sơ đồ Mô hình Tài nguyên (Resource Model Diagram)
 
@@ -94,7 +94,7 @@ classDiagram
     User "1" --> "1" StudentWeakness : computed projection
     Problem "*" --> "*" Tag : embeds tags[]
     Problem "1" --> "*" Submission : receives
-    Submission "1" --> "0..1" BigOAnalysis : on-demand /analyze
+    Submission "1" --> "0..1" BigOAnalysis : on-demand /analyze (non-CE)
     Job ..> Problem : tracks PROBLEM_GENERATE
     Job ..> Submission : tracks SUBMISSION_JUDGE
 ```
@@ -104,6 +104,8 @@ classDiagram
 ## 2. Sơ đồ Cơ sở Dữ liệu PostgreSQL (ERD)
 
 Core Gateway (`services/gateway/`) là thành phần **duy nhất** sở hữu schema và kết nối trực tiếp tới PostgreSQL. Định nghĩa DDL chuẩn nằm tại `services/gateway/migrations/001_init.sql`.
+
+> **Ghi chú kỹ thuật về `source_code_sha256`:** Cột `source_code_sha256` trong `submissions` và `ai_cache` luôn lưu mã băm `SHA-256` của **mã nguồn sau khi Gateway tự canonicalize** (xóa comment + chuẩn hóa khoảng trắng), tuyệt đối không băm chuỗi thô và không nhận hash do client gửi lên.
 
 ```mermaid
 erDiagram
@@ -214,31 +216,27 @@ erDiagram
 
 ## 3. Vì sao Resource Model KHÁC với Database Schema?
 
-Việc tách biệt API Resource Model khỏi cấu trúc bảng quan hệ là nguyên tắc thiết kế bắt buộc để tránh rò rỉ chi tiết lưu trữ nội bộ, bảo vệ thông tin nhạy cảm và tối ưu hóa trải nghiệm client:
-
 | Khía cạnh | Trong PostgreSQL Schema | Trong Public REST Resource Model | Lý do tách biệt |
 | :--- | :--- | :--- | :--- |
-| **Quan hệ nhiều-nhiều `problems` <-> `tags`** | Bảng trung gian `problem_tags(problem_id, tag_id)` chuẩn hóa 3NF | Mảng nhúng `tags: Tag[]` ngay bên trong đối tượng `Problem` | Tránh bài toán N+1 request phía Frontend; bảng `problem_tags` không có ý nghĩa độc lập với người dùng API. |
-| **Hồ sơ điểm yếu học sinh (`StudentWeakness`)** | **Không có bảng riêng** (tính toán tổng hợp động qua `JOIN` giữa `submissions`, `problems`, `problem_tags`, `tags`) | Tài nguyên chỉ đọc `GET /api/v1/students/{studentId}/weaknesses` | Dữ liệu dẫn xuất (computed projection), tính trực tiếp từ lịch sử nộp bài để tránh đồng bộ dư thừa ở MVP. |
-| **Bảng `ai_cache`** | Lưu trữ khóa duy nhất `(problem_id, source_code_sha256)` cùng metadata `model_version` | **Ẩn hoàn toàn** khỏi public API; chỉ biểu diễn qua cờ `cached: boolean` trong response của `POST /submissions/{id}/analyze` | Caching là chiến lược tối ưu hạ tầng nội bộ; client không cần biết hay thao tác trực tiếp bảng cache. |
-| **Trường nhạy cảm / nội bộ trên `users` và `problems`** | `users.password_hash`, `problems.generator_code`, `problems.reference_solution_cpp`, `problems.storage_path`, `submissions.source_code_sha256` | **Loại bỏ hoàn toàn** khỏi response công khai (đặc biệt ngăn học sinh thấy `reference_solution_cpp` hay đường dẫn filesystem `/data/problems/...`) | Bảo mật xác thực, chống gian lận lời giải mẫu và che giấu cấu trúc hệ thống tập tin máy chủ. |
-| **Cột `version` cho concurrency/caching** | Cột số nguyên `version INT` trong `problems` và `submissions` | Ánh xạ thành HTTP Header `ETag: W/"problem-<id>-v<version>"` | Tận dụng cơ chế chuẩn HTTP `304 Not Modified` thay vì buộc client tự quản lý số phiên bản trong JSON body. |
-| **Tài nguyên bất đồng bộ `Job`** | Bảng `jobs` lưu cả `payload` nội bộ và liên kết mềm `(resource_type, resource_id)` | Trả về trạng thái chuẩn hóa (`PENDING`/`RUNNING`/`COMPLETED`/`FAILED`) kèm `resource_id` khi hoàn tất | Che giấu chi tiết hàng đợi Redis Streams và cho phép mở rộng thêm loại job mới mà không phá vỡ hợp đồng REST. |
+| **Quan hệ nhiều-nhiều `problems` <-> `tags`** | Bảng trung gian `problem_tags(problem_id, tag_id)` chuẩn hóa 3NF | Mảng nhúng `tags: Tag[]` ngay bên trong đối tượng `Problem` | Tránh N+1 request phía Frontend; bảng nối không có ý nghĩa độc lập với consumer. |
+| **Hồ sơ điểm yếu (`StudentWeakness`)** | **Không có bảng riêng** (tổng hợp động bằng `JOIN`) | Tài nguyên chỉ đọc `GET /api/v1/students/{studentId}/weaknesses` | Dữ liệu dẫn xuất (computed projection), tránh dư thừa đồng bộ ở MVP. |
+| **Bảng `ai_cache`** | Khóa duy nhất `(problem_id, source_code_sha256)` trên mã nguồn đã canonicalize | **Ẩn hoàn toàn** khỏi public API; chỉ biểu diễn qua `cached: boolean` | Caching & canonicalization là tối ưu nội bộ phía Gateway; không tin hash từ client. |
+| **Trường nhạy cảm / nội bộ** | `password_hash`, `generator_code`, `reference_solution_cpp`, `storage_path`, `source_code_sha256` | **Loại bỏ hoàn toàn** khỏi response công khai | Bảo mật xác thực, chống gian lận lời giải mẫu và che giấu filesystem máy chủ. |
+| **Cột `version`** | `version INT` trong `problems` và `submissions` | Ánh xạ thành HTTP Header `ETag: W/"problem-<id>-v<version>"` | Tận dụng cơ chế chuẩn HTTP `304 Not Modified`. |
+| **Tài nguyên bất đồng bộ `Job`** | Lưu `payload` nội bộ + `(resource_type, resource_id)` | Chuẩn hóa `PENDING`/`RUNNING`/`COMPLETED`/`FAILED` + `resource_id` | Che giấu chi tiết Redis Streams và dễ mở rộng loại job mới. |
 
 ---
 
 ## 4. Kiến trúc Hệ thống SOA (System Architecture Diagram)
 
-Sơ đồ dưới đây thể hiện rõ 4 thành phần dịch vụ, Redis Streams Broker và các **ranh giới tin cậy (Trust Boundaries)**:
-
 ```mermaid
 flowchart LR
-    subgraph ClientZone["Vùng Client (Trình duyệt)"]
-        SPA["Client SPA<br/>React + Plain Monaco (No LSP)"]
+    subgraph ClientZone["Vùng Client (Trình duyệt — 0 tải Server cho Syntax/Format)"]
+        SPA["Client SPA (React + Monaco)<br/>Tree-sitter WASM Syntax Gate (C++/Py packs)<br/>+ Client Formatter (No Backend LSP)"]
     end
 
     subgraph CoreZone["Vùng Điều phối Trung tâm (Core Boundary)"]
-        GW["Core Gateway & Orchestrator<br/>Go (HTTP REST /api/v1/*)<br/>JWT/RBAC + ETag + Job Tracker"]
+        GW["Core Gateway & Orchestrator (Go)<br/>JWT/RBAC + ETag + Job Tracker<br/>Canonicalizer + SHA-256 + singleflight + CE Gate"]
         PG[("PostgreSQL<br/>(SOLE Owner: Gateway)")]
     end
 
@@ -272,21 +270,25 @@ flowchart LR
 ```
 
 ### Tóm tắt Ranh giới Tin cậy (Trust Boundaries)
-1. **Public Edge (`SPA -> Gateway`):** Chỉ cho phép HTTPS + JWT Bearer (`TEACHER` / `STUDENT`). Mọi đầu vào đều được validate schema và phân quyền RBAC tại Gateway.
-2. **Internal AI Boundary (`Gateway -> AI Service`):** AI Service không mở port ra ngoài Internet; bắt buộc kiểm tra header `X-Internal-API-Key` khớp secret nội bộ.
-3. **Sandbox Isolation (`Redis Streams -> Judge Workers`):** Judge Workers chạy code không tin cậy bên trong `cptbox`, hoàn toàn **không có biến môi trường hay kết nối PostgreSQL**. Chỉ Verification Worker có quyền ghi `:rw` vào `/data/problems`; Judging Workers chỉ đọc `:ro`.
+
+1. **Public Edge (`SPA -> Gateway`):** Chỉ cho phép HTTPS + JWT Bearer (`TEACHER` / `STUDENT`). Client chạy Tree-sitter WASM Syntax Gate & Formatter để cải thiện UX và chặn sớm lỗi cú pháp, nhưng **Gateway không bao giờ tin đầu vào đã format hay hash từ client** — Gateway luôn tự canonicalize và tự tính `sha256`.
+2. **Internal AI Boundary (`Gateway -> AI Service`):** AI Service không mở port ra ngoài Internet; bắt buộc kiểm tra header `X-Internal-API-Key`.
+3. **Sandbox Isolation (`Redis Streams -> Judge Workers`):** Judge Workers chạy code không tin cậy bên trong `cptbox`, **ZERO DB credentials**. Verification Worker mount `/data/problems:rw`; Judging Workers chỉ đọc `:ro`.
+
+### Điểm mở rộng Kiến trúc cho P1 / P2 (Không phá vỡ hợp đồng P0 — Theo #15)
+
+- **P1 (Machine Loop — #16, #17):** Kiến trúc Gateway Orchestration cho phép cắm vòng lặp **Self-Revision** (khi `verify_results.verified == false`, Gateway gọi lại AI Service với phản hồi lỗi tối đa `max_revisions` lần) và mở rộng trường tùy chọn `adversarial_solutions[]` trên `verify_jobs` để Judge Worker kiểm chứng mutation kill rate mà không thay đổi luồng P0.
+- **P2 (Human Loop — #18, #19):** Sau khi P0/P1 ổn định, có thể bổ sung bảng `problem_feedback`, cột `calibrated_difficulty` và endpoint đánh giá chất lượng đề để cung cấp dữ liệu hiệu chỉnh độ khó thực nghiệm cho AI Service.
 
 ---
 
 ## 5. Sơ đồ Tuần tự Luồng Trọng tâm (Sequence Diagram)
 
-Sơ đồ mô tả trọn vẹn 2 pha của luồng trọng tâm: **(A) Tự xác minh khi sinh đề bài** và **(B) Nộp bài chấm phân tầng + Phân tích Big-O On-Demand**:
-
 ```mermaid
 sequenceDiagram
     autonumber
     actor Teacher as Giáo viên (SPA)
-    actor Student as Học sinh (SPA)
+    actor Student as Học sinh (SPA + WASM)
     participant GW as Core Gateway (Go)
     participant DB as PostgreSQL
     participant AI as AI Service
@@ -313,9 +315,17 @@ sequenceDiagram
     Teacher->>GW: GET /api/v1/jobs/{job_id}
     GW-->>Teacher: 200 OK { status: COMPLETED, resource_id: problem_id }
 
-    Note over Student,JW: PHA B: Nộp bài O(N^2) -> TLE Subtask 3 -> Phân tích Big-O On-Demand
-    Student->>GW: POST /api/v1/submissions (problem_id, cpp20, source_code)
-    GW->>DB: INSERT submissions (PENDING, sha256) & jobs (SUBMISSION_JUDGE)
+    Note over Student,JW: PHA B: WASM Syntax Gate + Format -> Nộp bài -> Chặn CE & Canonical Hash Cache
+    Student->>Student: Tree-sitter WASM kiểm tra cú pháp (C++/Python pack)
+    alt Lỗi cú pháp nghiêm trọng
+        Student-->>Student: Báo lỗi tại Editor (chặn submit, 0 tải server)
+    else Hợp lệ cú pháp
+        Student->>Student: Client Formatter chuẩn hóa code (UX)
+        Student->>GW: POST /api/v1/submissions (problem_id, cpp20, source_code)
+    end
+
+    GW->>GW: Server Canonicalizer (xóa comment + khoảng trắng) -> sha256
+    GW->>DB: INSERT submissions (PENDING, canonical_sha256) & jobs (SUBMISSION_JUDGE)
     GW-->>Student: 202 Accepted { job_id, submission_id }
     GW->>RS: XADD judge_jobs { job_id, submission_id, storage_path, source_code }
 
@@ -329,14 +339,19 @@ sequenceDiagram
     GW-->>Student: 200 OK + ETag { status: TLE, subtask_timings[] }
 
     Student->>GW: POST /api/v1/submissions/{submission_id}/analyze (On-Demand)
-    GW->>DB: SELECT * FROM ai_cache WHERE (problem_id, source_code_sha256)
-    alt Cache Hit
-        GW-->>Student: 200 OK { detected_complexity, socratic_hint, cached: true }
-    else Cache Miss
-        GW->>AI: POST /internal/ai/analyze-complexity (code + subtask_timings)
-        AI-->>GW: { detected_complexity: O(N^2), socratic_hint, guiding_questions }
-        GW->>DB: INSERT INTO ai_cache
-        GW-->>Student: 200 OK { detected_complexity, socratic_hint, cached: false }
+    alt submission.status == CE hoặc chưa chấm xong
+        GW-->>Student: 422 VALIDATION_ERROR (không phân tích bài lỗi biên dịch)
+    else Bài đã chấm (non-CE)
+        GW->>GW: singleflight / Redis lock theo (problem_id, canonical_sha256)
+        GW->>DB: SELECT * FROM ai_cache WHERE (problem_id, source_code_sha256)
+        alt Cache Hit
+            GW-->>Student: 200 OK { detected_complexity, socratic_hint, cached: true }
+        else Cache Miss
+            GW->>AI: POST /internal/ai/analyze-complexity (code + subtask_timings)
+            AI-->>GW: { detected_complexity: O(N^2), socratic_hint, guiding_questions }
+            GW->>DB: INSERT INTO ai_cache ON CONFLICT DO NOTHING
+            GW-->>Student: 200 OK { detected_complexity, socratic_hint, cached: false }
+        end
     end
 ```
 
@@ -345,19 +360,16 @@ sequenceDiagram
 ## 6. Ngăn xếp Công nghệ & Chiến lược Kiểm thử
 
 ### 6.1 Tech Stack
-- **Frontend:** React + TypeScript + `@monaco-editor/react` (thuần, không LSP), Fetch/Axios client.
-- **Core Gateway:** Go (`net/http` / router chuẩn), PostgreSQL 16 (`pgx`), Redis 7 Streams (`go-redis`).
+- **Frontend:** React + TypeScript + `@monaco-editor/react` + **`web-tree-sitter` (WASM language packs: C++, Python) + Client Formatter** (không chạy Backend Full LSP).
+- **Core Gateway:** Go (`net/http`, `pgx`, `go-redis`, `golang.org/x/sync/singleflight`), PostgreSQL 16, Redis 7 Streams.
 - **Judge Worker:** Go Redis Streams consumer bọc `dmoj/judge-small` (`dmoj-cli` + `cptbox`).
-- **AI Service:** Python (FastAPI) hoặc Go (Long chốt dứt điểm trong Tuần 12) gọi `gemini-3.8-flash` với structured JSON output.
+- **AI Service:** Python (FastAPI) gọi `gemini-3.8-flash` với structured JSON output (chi tiết tại `docs/long/`).
 - **Contract & Mock Tooling:** OpenAPI 3.0.3, Swagger UI (`swaggerapi/swagger-ui`), Stoplight Prism 4 (`stoplight/prism:4`).
 
 ### 6.2 Chiến lược Kiểm thử (Testing Strategy)
-1. **Tuần 12 (Contract-First Validation):**
-   - Kiểm tra cú pháp OpenAPI 3.0.3 (zero broken `$ref`, đúng cấu trúc response/error).
-   - Chạy `docker-compose.mock.yml` (Swagger UI + Prism Mock) để kiểm chứng luồng happy path và các mã lỗi `401`/`403`/`422`.
-   - Chạy bộ Postman Collection (`tests/postman/algobloom-w12-mock.postman_collection.json`) trực tiếp trên Prism (`{{base_url}} = http://localhost:4010`).
+1. **Tuần 12 (Contract-First Validation):** Kiểm tra OpenAPI 3.0.3, chạy `docker-compose.mock.yml`, chạy Postman Collection trên Prism.
 2. **Tuần 13–14 (Unit, Integration & Sandbox Verification):**
-   - **Go Gateway:** Unit/handler tests bằng `net/http/httptest` (JWT/RBAC, unified error format, `ETag` `304`, cache hit/miss `ai_cache`).
-   - **Judge Worker:** Kiểm thử tích hợp với Redis Streams thật và mã nguồn C++ mẫu (`AC` $O(N \log N)$ vs `TLE` $O(N^2)$) chạy trong `cptbox`.
-   - **AI Service:** Kiểm thử JSON Schema validation trên cả hai chế độ `MOCK_AI=true` và `gemini-3.8-flash` thật, mô phỏng retry `429`.
-   - **End-to-End Contract:** Chạy lại chính bộ Postman/Newman collection của Tuần 12 nhưng trỏ `{{base_url}}` sang Go Gateway thật (`http://localhost:8000`) để bảo đảm không lệch hợp đồng.
+   - **Go Gateway:** `httptest` kiểm chứng JWT/RBAC, `ETag` `304`, **canonicalizer (thêm space / comment ra cùng 1 `sha256`)**, `422` khi gọi `/analyze` trên bài `CE`, và **concurrent test 2 request song song vào `/analyze` chỉ gọi AI Service đúng 1 lần (`singleflight`)**.
+   - **Frontend:** Kiểm chứng Tree-sitter WASM chặn lỗi cú pháp C++/Python trước khi gửi request và formatter chạy đúng trước `POST /submissions`.
+   - **Judge Worker:** Kiểm thử `AC` $O(N \log N)$ vs `TLE` $O(N^2)$ trong `cptbox` qua Redis Streams.
+   - **AI Service:** Kiểm thử JSON Schema validation ở cả `MOCK_AI=true` và `gemini-3.8-flash` thật + retry `429`.
