@@ -1,75 +1,49 @@
-# Báo cáo Tiến độ Tuần 12 (Design Review Progress Report) — AlgoBloom
+# Báo cáo Tiến độ Tuần 12 (Design Review) — AlgoBloom
 
-- **Dự án:** AlgoBloom — AI-Augmented Online Judge (SOA Gateway Orchestration)
+- **Dự án:** AlgoBloom — AI-Augmented Online Judge (Kiến trúc SOA — Gateway Orchestration)
 - **Repository:** `https://github.com/thep1ckaxe91/AlgoBloom`
-- **Giai đoạn báo cáo:** Tuần 12 — Thiết kế Kiến trúc, Hợp đồng API & Mock Server
-- **Thành viên nhóm:** Nam, Khánh, Long, Sơn
+- **Ngày cập nhật:** 25/11/2026 | **Nhóm thực hiện:** Nam, Khánh, Long, Sơn
 
 ---
 
-## 1. Công việc đã hoàn thành (Completed Work)
+## 1. Công việc đã hoàn thành & Bằng chứng (Completed Work & Evidence)
 
-1. **Chốt Kiến trúc SOA & Quyết định Đánh đổi (`docs/adr-summary.md`, `docs/design.md`):**
-   - Hoàn thiện kiến trúc Gateway Orchestration (Option A) với 4 thành phần tách biệt (`frontend`, `services/gateway`, `services/ai-service`, `services/judge-worker`) và Redis Streams Broker.
-   - Hoàn thiện sơ đồ Resource Model, sơ đồ ERD PostgreSQL (7 bảng), bảng phân tích sự khác biệt giữa Resource Model và DB Schema, sơ đồ SOA Topology với ranh giới tin cậy và Sequence Diagram luồng tự xác minh đề + chấm bài + phân tích Big-O.
-2. **Hoàn thiện Hợp đồng API & Message Broker (`contracts/openapi.yaml`, `contracts/redis-schemas.json`):**
-   - Xây dựng đầy đủ đặc tả OpenAPI 3.0.3 cho 14 endpoints `/api/v1/*` kèm bảo mật JWT (`BearerAuth`) & `X-Internal-API-Key`, phân trang/lọc/sắp xếp, `202 Accepted` async jobs, `ETag` caching, unified error format (`400`/`401`/`403`/`404`/`422`/`429`/`500`) và payload mẫu thực tế.
-   - Đặc tả JSON Schema + ví dụ cho 4 Redis Streams (`verify_jobs`, `verify_results`, `judge_jobs`, `judge_results`).
-3. **Dựng Stack Demo Swagger UI + Prism Mock & Bộ kiểm thử Postman:**
-   - Cung cấp `docker-compose.mock.yml` chạy một lệnh ra Swagger UI (`:8080`) + Stoplight Prism 4 (`:4010`).
-   - Khởi tạo bộ Postman Collection (`tests/postman/algobloom-w12-mock.postman_collection.json`) kiểm chứng happy path và negative cases (`401`, `403`, `422`).
-4. **Chuẩn bị Tài liệu Dự án, Kế hoạch & Khung mã nguồn Tuần 13 (Premove):**
-   - Hoàn thành `README.md`, `docs/project-brief.md`, `docs/backlog-and-plan.md`, `docs/slides-outline-w12.md`.
-   - Khởi tạo khung dịch vụ sạch cho Tuần 13 (`services/gateway` + SQL migrations/seed, `services/judge-worker`, `services/ai-service/schemas`, `frontend/README.md`) và phân rã toàn bộ GitHub Issues cho Tuần 12–13.
-5. **Sơn — Hoàn thiện sản phẩm Design Review (Issue #4):**
-   - Rà soát, tinh gọn `docs/project-brief.md` trong giới hạn 1–2 trang; làm rõ MVP và Out-of-Scope.
-   - Hoàn thiện 3 wireframe SVG trong `docs/wireframes/`: Tag-Combiner Studio, Code Workspace, Big-O Hint Drawer; đối chiếu OpenAPI Contract, Big-O theo yêu cầu (on-demand), không tích hợp LSP.
-   - Xuất bộ 7 slide theo nội dung **gốc** của `docs/slides-outline-w12.md`, bàn giao bản PDF tại `docs/presentation/AlgoBloom_W12_Slide.pdf`; không sửa dàn ý gốc.
-   - Trực tiếp thử luồng demo trên Swagger UI + Prism: không có token nhận `401`; tạo đề `202`; GET Job `200`; GET Problem `200`; nộp bài `202`; GET Submission `200` với `TLE` và 50/100 điểm, đủ 4 Subtask; phân tích Big-O `200` với `O(N²)` so với `O(N log N)` và gợi ý Socratic. Đã lưu 6 ảnh minh chứng ở `docs/evidence/`.
-   - **Phạm vi xác nhận:** Đây là thử nghiệm Contract/Mock, không phải kiểm thử E2E trên Gateway/Judge/AI thật; chưa xác nhận Postman chạy PASS.
+| Thành viên | Vai trò | Công việc đã hoàn thành ở Tuần 12 | Bằng chứng (Commit / PR / Tệp) |
+| :--- | :--- | :--- | :--- |
+| **Nam** (`@thep1ckaxe91`) | Judge Infra, Redis Broker & Tech Lead | - Bootstrap monorepo SOA, hợp đồng `openapi.yaml` (13 paths / 14 operations), `redis-schemas.json` (4 streams), `docker-compose.mock.yml`, khung dịch vụ T13 và hệ thống Issues (#1–#19).<br>- Chạy kiểm chứng thực tế Swagger UI (`:8080`) kết nối Prism Mock (`:4010`).<br>- Phối hợp Long phân pha AI Service **P0 → P1 → P2** (#15–#19); phối hợp Khánh chốt **Option 1** (Client WASM Syntax Gate + Formatter; Gateway tự canonicalize + `sha256` + `singleflight` + chặn `422` bài `CE`).<br>- Review và merge PR #27 (Sơn) & PR #23 (Long). | Commit `9de57f3`, **PR #20** (Merged `f307773`), [docs/nam/](nam/README.md), ảnh [swagger-ui-w12.png](nam/evidence/swagger-ui-w12.png), [redis-schemas.json](../contracts/redis-schemas.json) |
+| **Sơn** (`@ngobason`) | Client SPA & Presentation | - Tinh gọn `docs/project-brief.md` (1–2 trang, rõ MVP vs Out-of-Scope và giới hạn Mock).<br>- Hoàn thiện 3 wireframe SVG đối chiếu OpenAPI Contract (Tag-Combiner Studio, Code Workspace, Big-O Hint Drawer — on-demand, không Backend LSP).<br>- Xuất bộ 7 slide PDF Design Review và tự tay chạy thử luồng demo 4 bước trên Swagger UI + Prism (`401`, `202`, `200`, `TLE` 4 subtask, Big-O Socratic hint). | **PR #27** (Merged `bdb59e2`, đóng Issue #4), [AlgoBloom_W12_Slide.pdf](presentation/AlgoBloom_W12_Slide.pdf), [wireframes/](wireframes/), 6 ảnh mock `docs/evidence/01..06-*.png` |
+| **Long** (`@LongSei`) | AI Pedagogical Service | - Chốt ngôn ngữ triển khai AI Service là **Python FastAPI** (giữ nguyên hợp đồng `/internal/ai/*` & 4 JSON Schemas).<br>- Đề xuất định hướng mở rộng 2 vòng lặp P0 → P1 → P2 (#15) tách thành follow-up issues #16–#19 không phình phạm vi T13.<br>- Hoàn thiện bộ tài liệu thiết kế AI T12, prompt, JSON request mẫu tổng hợp, kịch bản trình bày và checklist nghiệm thu T12–T15. | **PR #23** (Merged `db22224`), Issue #15, [docs/long/t12/README.md](long/t12/README.md), [ai-service-stack-decision.md](long/ai-service-stack-decision.md), [services/ai-service/README.md](../services/ai-service/README.md) |
+| **Khánh** (`@namnkahn1607`) | Core Gateway, Auth & DB | - Khung hợp đồng OpenAPI 3.0.3, PostgreSQL DDL 7 bảng (`001_init.sql`, `002_seed.sql`), bảng Resource Model vs DB Schema và bộ Postman Collection đã có sẵn trên `main` và đạt kiểm tra cú pháp/JSON/`$ref`.<br>- Tham gia chốt quy ước chống xung đột `docs/<member>/` và phương án chống lách cache / spam `CE` (Option 1). | Commit `9de57f3`, [openapi.yaml](../contracts/openapi.yaml), [001_init.sql](../services/gateway/migrations/001_init.sql), [Postman Collection](../tests/postman/algobloom-w12-mock.postman_collection.json) |
+
+*Phạm vi xác nhận trung thực:* Kết quả chạy thử Tuần 12 là kiểm chứng **Contract/Mock** trên Swagger UI + Stoplight Prism (`docker-compose.mock.yml`), chưa phải kiểm thử E2E trên PostgreSQL, Redis Streams, `cptbox` hay live LLM provider.
 
 ---
 
-## 2. Hạng mục đang hoàn thiện trong Thứ Ba (In-Progress / Pending before Wednesday Review)
+## 2. Công việc chưa hoàn thành (Incomplete Items)
 
-- [ ] **Nam:** Kiểm chứng chạy thực tế `docker-compose.mock.yml` trên máy local, chụp ảnh minh chứng Swagger UI + rà soát sơ đồ Mermaid/Redis schemas qua PR.
-- [ ] **Khánh:** Rà soát đối chiếu 100% trường giữa `contracts/openapi.yaml` và `001_init.sql`, chạy Postman Collection trên Prism và ghi nhận kết quả qua PR.
-- [ ] **Long:** Chạy gọi thử `gemini-3.8-flash` thật để tinh chỉnh payload mẫu trong `openapi.yaml` và chốt ngăn xếp triển khai AI Service (Python FastAPI vs. Go) qua PR.
-- [x] **Sơn:** Đã hoàn thiện 3 wireframe, Project Brief, bộ slide PDF 7 trang theo dàn ý gốc và minh chứng Swagger UI + Prism; đã commit `b2b0aaa`, push lên fork và mở PR vào repository nhóm.
-- [ ] **Sơn (chờ review):** PR đã mở nhưng còn yêu cầu ít nhất một approving review từ người có quyền Write; chưa merge vào `main`.
+- [ ] **Khánh (Issue #2):** Chưa mở PR cá nhân để ghi nhận kết quả chạy thực tế Postman Collection trên Prism Mock Server (happy path + `401`/`403`/`422`) và đối chiếu chi tiết lần cuối giữa `openapi.yaml` với `001_init.sql`.
+- [ ] **Long (Issue #3):** Chưa chạy xác thực cuộc gọi API thật tới model provider (`gemini-3.8-flash` / kiểm chứng quota thật) để thay thế các payload tổng hợp trong `openapi.yaml`; toàn bộ payload hiện tại là dữ liệu mẫu phục vụ Contract/Mock.
+- [ ] **Nam (Issue #1):** Đã kiểm chứng Swagger/Prism và đồng bộ tài liệu vào `docs/nam/` (PR #20), còn bước hoàn thiện spike `cptbox` thực tế sẽ thực hiện ngay đầu Tuần 13.
 
 ---
 
-## 3. Khó khăn / Rủi ro & Đề xuất Hỗ trợ (Blockers & Support Needed)
+## 3. Khó khăn, Rủi ro & Vấn đề cần Giảng viên hỗ trợ (Blockers & Support Needed)
 
-- **Kỹ thuật sandbox (`cptbox` trong Docker):** Chưa chạy thử nghiệm `dmoj/judge-small` trên môi trường Linux/Docker của từng thành viên (rủi ro về `SYS_PTRACE` / cgroups v2). Nhóm đã xếp lịch spike đầu tiên cho Nam ngay sau buổi Review Thứ Tư.
-- **Giới hạn Free Tier của `gemini-3.8-flash`:** Rủi ro gặp lỗi `429` khi nhiều thành viên cùng test. Nhóm đã thiết kế cơ chế `MOCK_AI=true` + cache băm PostgreSQL để phát triển độc lập không phụ thuộc quota.
-- **Hỗ trợ cần từ Giảng viên:** Nhờ giảng viên góp ý trong buổi Design Review về ranh giới tách `Resource Model` vs `DB Schema` và thiết kế luồng `202 Accepted` polling `GET /api/v1/jobs/{jobId}` trước khi nhóm khóa hợp đồng bước vào Tuần 13.
-
----
-
-## 4. Kế hoạch Tuần 13 (Week 13 Implementation Plan)
-
-| Thành viên | Công việc trọng tâm Tuần 13 | Tiêu chí hoàn thành (DoD) |
-| :--- | :--- | :--- |
-| **Khánh** | Triển khai Go Core Gateway: Auth JWT/RBAC, migrations/seed PostgreSQL, CRUD Tags/Problems/Submissions + `ETag`, `202` Job Dispatcher & Redis consumer | Server Go chạy ổn định, Postman collection chạy pass trên Gateway thật (`:8000`) |
-| **Nam** | Dựng Docker image `dmoj/judge-small` + Go Redis Streams worker cho `verify_jobs` và `judge_jobs`, đo `subtask_timings[]` | Chấm thành công 1 bài `AC` $O(N \log N)$ và 1 bài `TLE` $O(N^2)$ trong `cptbox` qua Redis Streams |
-| **Long** | Triển khai AI Service (`/internal/ai/generate-problem`, `/internal/ai/analyze-complexity`), `X-Internal-API-Key`, backoff `429`, `MOCK_AI=true` | Trả về JSON đúng schema 100% ở cả chế độ `MOCK_AI=true` và Gemini thật |
-| **Sơn** | Khởi tạo React SPA + plain `@monaco-editor/react` (no LSP), nối 3 màn hình chính với API + polling job | Demo được trọn vẹn luồng UI từ đăng nhập -> chọn tag tạo đề -> code & nộp bài -> mở drawer gợi ý Big-O |
+1. **Rủi ro kỹ thuật `cptbox` trong Docker (R-01 — Nam):** Chưa kiểm chứng quyền kernel (`SYS_PTRACE`, seccomp, cgroups v2) của `dmoj/judge-small` trên máy các thành viên $\to$ xử lý bằng spike kỹ thuật đầu tiên ở Tuần 13 (#8).
+2. **Giới hạn quota Free Tier & lách cache AI (R-02 — Long & Khánh):** Đã thiết kế 4 lớp bảo vệ tại Gateway (on-demand + chặn `422` bài `CE` + Server-side Canonicalizer xóa comment/space trước khi `sha256` + `singleflight` lock) kết hợp `MOCK_AI=true` và exponential backoff `429`.
+3. **Nội dung xin góp ý từ Giảng viên trong buổi Design Review:**
+   - Góp ý ranh giới tách biệt giữa **Resource Model** và **PostgreSQL ERD** (`problem_tags`, computed `StudentWeakness`, ẩn `ai_cache`).
+   - Xác nhận tính hợp lý của luồng bất đồng bộ **`202 Accepted` + polling `GET /api/v1/jobs/{jobId}`** cùng quyết định dùng **Client WASM Syntax Gate** thay vì Backend Full LSP.
 
 ---
 
-## 5. Minh chứng (Evidence Links)
+## 4. Kế hoạch Tuần 13 & Phân công Trách nhiệm (Week 13 Plan)
 
-> *Ghi chú: Các thành viên điền link commit/PR cụ thể và đính kèm ảnh chụp Swagger/Postman vào mục này trước giờ nộp Thứ Tư.*
+Mục tiêu Tuần 13: Chạy backend kết nối **PostgreSQL & Redis Streams thật**, demo tối thiểu 3 API operations liên quan cùng ít nhất 1 trường hợp lỗi/không đủ quyền (`401`/`403`/`422`).
 
-- **Repository & Bootstrap Commit:** `https://github.com/thep1ckaxe91/AlgoBloom/commits/main`
-- **GitHub Issues (Tuần 12 & 13):** `https://github.com/thep1ckaxe91/AlgoBloom/issues`
-- **PR Tuần 12 của các thành viên:**
-  - Nam (Redis Schemas & Diagrams): *(điền link PR sau khi mở)*
-  - Khánh (OpenAPI, ERD & Postman): *(điền link PR sau khi mở)*
-  - Long (Gemini Samples & AI Stack): *(điền link PR sau khi mở)*
-  - Sơn (Project Brief, Wireframes & Slides): https://github.com/thep1ckaxe91/AlgoBloom/pull/27
-    - [Project Brief](project-brief.md); [Tag-Combiner Studio](wireframes/01-tag-combiner-studio.svg); [Code Workspace](wireframes/02-code-workspace.svg); [Big-O Hint Drawer](wireframes/03-big-o-hint-drawer.svg); [Slide PDF 7 trang](presentation/AlgoBloom_W12_Slide.pdf).
-    - Ảnh mock: [Generate 202](evidence/01-generate-problem.png), [Job 200](evidence/02-job-polling.png), [Problem 200](evidence/03-get-problem.png), [Submit 202](evidence/04-submit-code.png), [Submission Result 200](evidence/05-submission-result.png), [Big-O Analyze 200](evidence/06-big-o-analysis.png).
-- **Ảnh chụp Swagger UI & Mock Response:** *(đính kèm trong `docs/evidence/` sau khi chạy `docker compose -f docker-compose.mock.yml up`)*
+| Thành viên | Issue Tuần 13 | Công việc trọng tâm | Tiêu chí hoàn thành (DoD) |
+| :--- | :--- | :--- | :--- |
+| **Khánh** | #5, #6, #7 | Triển khai Go Core Gateway: JWT + RBAC, migrations/seed PostgreSQL, CRUD + `ETag`, `202` Job Dispatcher, Redis result consumer, Server Canonicalizer + `singleflight` + chặn `CE` gọi `/analyze` | Server Go chạy với DB thật; chạy lại Postman Collection trỏ về `:8000` PASS toàn bộ happy path & `401`/`403`/`422` |
+| **Nam** | #8, #9, #10 | Spike `cptbox` trên `dmoj/judge-small`; hiện thực Go Redis Streams Worker cho `verify_jobs` (`:rw`) và `judge_jobs` (`:ro`), đo `subtask_timings[]` 4 tầng | Chấm thật 1 bài `AC` $O(N \log N)$ và 1 bài `TLE` $O(N^2)$ trong `cptbox` qua Redis Streams (0 DB credentials) |
+| **Long** | #11, #12 | Triển khai Python FastAPI AI Service: `X-Internal-API-Key`, `/internal/ai/generate-problem` & `/internal/ai/analyze-complexity`, backoff `429`, `MOCK_AI=true` + kiểm chứng live provider | Trả JSON đúng 100% schema ở cả chế độ mock và live provider; kiểm thử thiếu/sai internal key trả `401` |
+| **Sơn** | #13, #14 | Khởi tạo React SPA + Monaco + `web-tree-sitter` WASM Syntax Gate (C++/Python packs) + Client Formatter; nối 3 màn hình chính + Job polling + Big-O Hint Drawer | Demo đầu-cuối trên UI: Login -> Tag-Combiner Studio -> Code Workspace (chặn lỗi cú pháp trước submit) -> Big-O Drawer |
