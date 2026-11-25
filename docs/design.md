@@ -224,6 +224,7 @@ erDiagram
 | **Trường nhạy cảm / nội bộ** | `password_hash`, `generator_code`, `reference_solution_cpp`, `storage_path`, `source_code_sha256` | **Loại bỏ hoàn toàn** khỏi response công khai | Bảo mật xác thực, chống gian lận lời giải mẫu và che giấu filesystem máy chủ. |
 | **Cột `version`** | `version INT` trong `problems` và `submissions` | Ánh xạ thành HTTP Header `ETag: W/"problem-<id>-v<version>"` | Tận dụng cơ chế chuẩn HTTP `304 Not Modified`. |
 | **Tài nguyên bất đồng bộ `Job`** | Lưu `payload` nội bộ + `(resource_type, resource_id)` | Chuẩn hóa `PENDING`/`RUNNING`/`COMPLETED`/`FAILED` + `resource_id` | Che giấu chi tiết Redis Streams và dễ mở rộng loại job mới. |
+| **Phiên & `refresh_token` (`POST /auth/refresh`)** | **Không có bảng trong PostgreSQL**; lưu trạng thái nội bộ của Gateway trên **Redis Key-Value có TTL** (`auth:refresh:<jti>`, TTL `604800s`) | Chuỗi `refresh_token` trả trong `AuthResponse` | Tự động hết hạn (auto-expire), hỗ trợ token rotation & thu hồi tức thì mà không làm phình schema PostgreSQL; chỉ dùng nội bộ Gateway nên không đưa vào `contracts/redis-schemas.json` (vốn chỉ đặc tả 4 Streams liên dịch vụ). Sẽ hoàn thiện cùng `/auth/logout` ở Tuần 13. |
 
 ---
 
