@@ -1,0 +1,15 @@
+{
+  "tags": [
+    "dp",
+    "binary-search"
+  ],
+  "difficulty": 1600,
+  "time_limit_ms": 2000,
+  "memory_limit_mb": 256,
+  "student_weakness_context": {
+    "weak_tags": [
+      "dp"
+    ],
+    "recommended_difficulty": 1600
+  }
+}
