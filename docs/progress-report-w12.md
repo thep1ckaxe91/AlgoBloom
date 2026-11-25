@@ -21,15 +21,15 @@
 
 ## 2. Công việc chưa hoàn thành (Incomplete Items)
 
-- [ ] **Khánh (Issue #2):** Chưa mở PR cá nhân để ghi nhận kết quả chạy thực tế Postman Collection trên Prism Mock Server (happy path + `401`/`403`/`422`) và đối chiếu chi tiết lần cuối giữa `openapi.yaml` với `001_init.sql`.
-- [ ] **Long (Issue #3):** Chưa chạy xác thực cuộc gọi API thật tới model provider (`gemini-3.8-flash` / kiểm chứng quota thật) để thay thế các payload tổng hợp trong `openapi.yaml`; toàn bộ payload hiện tại là dữ liệu mẫu phục vụ Contract/Mock.
-- [ ] **Nam (Issue #1):** Đã kiểm chứng Swagger/Prism và đồng bộ tài liệu vào `docs/nam/` (PR #20), còn bước hoàn thiện spike `cptbox` thực tế sẽ thực hiện ngay đầu Tuần 13.
+- **Khánh (Issue #2):** Chưa mở PR cá nhân để ghi nhận kết quả chạy thực tế Postman Collection trên Prism Mock Server (happy path + `401`/`403`/`422`) và đối chiếu chi tiết lần cuối giữa `openapi.yaml` với `001_init.sql`.
+- **Long (Issue #3):** Chưa chạy xác thực cuộc gọi API thật tới model provider (`gemini-3.8-flash` / kiểm chứng quota thật) để thay thế các payload tổng hợp trong `openapi.yaml`; toàn bộ payload hiện tại là dữ liệu mẫu phục vụ Contract/Mock.
+- **Nam (Issue #1):** Đã kiểm chứng Swagger/Prism và đồng bộ tài liệu vào `docs/nam/` (PR #20), còn bước hoàn thiện spike `cptbox` thực tế sẽ thực hiện ngay đầu Tuần 13.
 
 ---
 
 ## 3. Khó khăn, Rủi ro & Vấn đề cần Giảng viên hỗ trợ (Blockers & Support Needed)
 
-1. **Rủi ro kỹ thuật `cptbox` trong Docker (R-01 — Nam):** Chưa kiểm chứng quyền kernel (`SYS_PTRACE`, seccomp, cgroups v2) của `dmoj/judge-small` trên máy các thành viên $\to$ xử lý bằng spike kỹ thuật đầu tiên ở Tuần 13 (#8).
+1. **Rủi ro kỹ thuật `cptbox` trong Docker (R-01 — Nam):** Chưa kiểm chứng quyền kernel (`SYS_PTRACE`, seccomp, cgroups v2) của `dmoj/judge-small` trên máy các thành viên → xử lý bằng spike kỹ thuật đầu tiên ở Tuần 13 (#8).
 2. **Giới hạn quota Free Tier & lách cache AI (R-02 — Long & Khánh):** Đã thiết kế 4 lớp bảo vệ tại Gateway (on-demand + chặn `422` bài `CE` + Server-side Canonicalizer xóa comment/space trước khi `sha256` + `singleflight` lock) kết hợp `MOCK_AI=true` và exponential backoff `429`.
 3. **Nội dung xin góp ý từ Giảng viên trong buổi Design Review:**
    - Góp ý ranh giới tách biệt giữa **Resource Model** và **PostgreSQL ERD** (`problem_tags`, computed `StudentWeakness`, ẩn `ai_cache`).
@@ -44,6 +44,6 @@ Mục tiêu Tuần 13: Chạy backend kết nối **PostgreSQL & Redis Streams t
 | Thành viên | Issue Tuần 13 | Công việc trọng tâm | Tiêu chí hoàn thành (DoD) |
 | :--- | :--- | :--- | :--- |
 | **Khánh** | #5, #6, #7 | Triển khai Go Core Gateway: JWT + RBAC, migrations/seed PostgreSQL, CRUD + `ETag`, `202` Job Dispatcher, Redis result consumer, Server Canonicalizer + `singleflight` + chặn `CE` gọi `/analyze` | Server Go chạy với DB thật; chạy lại Postman Collection trỏ về `:8000` PASS toàn bộ happy path & `401`/`403`/`422` |
-| **Nam** | #8, #9, #10 | Spike `cptbox` trên `dmoj/judge-small`; hiện thực Go Redis Streams Worker cho `verify_jobs` (`:rw`) và `judge_jobs` (`:ro`), đo `subtask_timings[]` 4 tầng | Chấm thật 1 bài `AC` $O(N \log N)$ và 1 bài `TLE` $O(N^2)$ trong `cptbox` qua Redis Streams (0 DB credentials) |
+| **Nam** | #8, #9, #10 | Spike `cptbox` trên `dmoj/judge-small`; hiện thực Go Redis Streams Worker cho `verify_jobs` (`:rw`) và `judge_jobs` (`:ro`), đo `subtask_timings[]` 4 tầng | Chấm thật 1 bài `AC` `O(N log N)` và 1 bài `TLE` `O(N^2)` trong `cptbox` qua Redis Streams (0 DB credentials) |
 | **Long** | #11, #12 | Triển khai Python FastAPI AI Service: `X-Internal-API-Key`, `/internal/ai/generate-problem` & `/internal/ai/analyze-complexity`, backoff `429`, `MOCK_AI=true` + kiểm chứng live provider | Trả JSON đúng 100% schema ở cả chế độ mock và live provider; kiểm thử thiếu/sai internal key trả `401` |
-| **Sơn** | #13, #14 | Khởi tạo React SPA + Monaco + `web-tree-sitter` WASM Syntax Gate (C++/Python packs) + Client Formatter; nối 3 màn hình chính + Job polling + Big-O Hint Drawer | Demo đầu-cuối trên UI: Login -> Tag-Combiner Studio -> Code Workspace (chặn lỗi cú pháp trước submit) -> Big-O Drawer |
+| **Sơn** | #13, #14 | Khởi tạo React SPA + Monaco + `web-tree-sitter` WASM Syntax Gate (C++/Python packs) + Client Formatter; nối 3 màn hình chính + Job polling + Big-O Hint Drawer | Demo đầu-cuối trên UI: Login → Tag-Combiner Studio → Code Workspace (chặn lỗi cú pháp trước submit) → Big-O Drawer |
