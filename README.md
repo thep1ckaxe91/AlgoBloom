@@ -9,10 +9,10 @@
 
 ## Tóm tắt Kiến trúc SOA (Gateway Orchestration — Option A)
 
-- **`frontend/` (Client SPA):** React + `@monaco-editor/react` thuần (không LSP). Chỉ giao tiếp với Core Gateway qua `/api/v1/*`, polling trạng thái job `GET /api/v1/jobs/{jobId}` và tận dụng HTTP `ETag` caching của trình duyệt.
-- **`services/gateway/` (Core Gateway & Orchestrator — Go + PostgreSQL):** Thành phần **duy nhất** sở hữu cơ sở dữ liệu PostgreSQL. Phụ trách xác thực JWT/RBAC (`TEACHER`, `STUDENT`), danh mục Tag, Student Weakness Profiler, điều phối tác vụ bất đồng bộ `202 Accepted`, gọi nội bộ tới AI Service và tiêu thụ kết quả từ Redis Streams.
-- **`services/ai-service/` (AI Pedagogical Service):** Dịch vụ nội bộ (bảo vệ bởi header `X-Internal-API-Key`), bọc `gemini-3.8-flash` (Free Tier) với JSON Schema đầu ra nghiêm ngặt, cơ chế exponential backoff cho lỗi `429` và chế độ giả lập xác định `MOCK_AI=true`.
-- **`services/judge-worker/` (Judge Infra — Go + `dmoj/judge-small`):** Worker kéo job qua Redis Streams (`verify_jobs`, `judge_jobs`) và đẩy kết quả (`verify_results`, `judge_results`) dùng `XADD`/`XREADGROUP`/`XACK`. Hoàn toàn stateless, **không có thông tin đăng nhập DB**. Worker xác minh mount `/data/problems` ở chế độ `:rw`; các worker chấm bài chỉ mount `:ro`.
+- **`frontend/` (Client SPA):** React + `@monaco-editor/react` + **Client-side Tree-sitter WASM Syntax Gate (C++, Python) + Client Formatter** (không Backend Full LSP). Chỉ giao tiếp với Core Gateway qua `/api/v1/*`, polling trạng thái job `GET /api/v1/jobs/{jobId}` và tận dụng HTTP `ETag` caching của trình duyệt.
+- **`services/gateway/` (Core Gateway & Orchestrator — Go + PostgreSQL):** Thành phần **duy nhất** sở hữu cơ sở dữ liệu PostgreSQL. Phụ trách xác thực JWT/RBAC (`TEACHER`, `STUDENT`) với Redis TTL refresh token (`auth:refresh:<jti>`), danh mục Tag, Student Weakness Profiler, điều phối tác vụ bất đồng bộ `202 Accepted`, **Server-side Canonicalizer + `sha256` + `singleflight` lock + CE Gate (`422`)**, gọi nội bộ tới AI Service và tiêu thụ kết quả từ Redis Streams.
+- **`services/ai-service/` (AI Pedagogical Service — Python FastAPI):** Dịch vụ nội bộ (bảo vệ bởi header `X-Internal-API-Key`), tích hợp Gemini Free Tier với JSON Schema đầu ra nghiêm ngặt, cơ chế exponential backoff cho lỗi `429` và chế độ giả lập xác định `MOCK_AI=true`.
+- **`services/judge-worker/` (Judge Infra — Go + `dmoj/judge-small`):** Worker kéo job qua Redis Streams (`verify_jobs`, `judge_jobs`) và đẩy kết quả (`verify_results`, `judge_results`) dùng `XADD`/`XREADGROUP`/`XACK`. Hoàn toàn stateless, **ZERO database credentials** và bị cô lập mạng `broker_net` (không chạm DB, không ra Internet). Worker xác minh mount `/data/problems:rw`; các worker chấm bài chỉ mount `:ro`.
 
 ---
 
@@ -27,9 +27,35 @@
 
 ---
 
-## Khởi chạy Swagger UI + Prism Mock Server (1 lệnh)
+## Khởi chạy Full-Stack Dev với Database thật (Tuần 13+)
 
 Yêu cầu: Docker & Docker Compose.
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+```
+
+Sau khi khởi động thành công:
+- **Core Go Gateway:** http://localhost:8000 (`GET /health`)
+- **Swagger UI:** http://localhost:8080 *(chọn server `http://localhost:8000` để gọi Gateway thật)*
+- **PostgreSQL 16:** tự động chạy `001_init.sql` (7 bảng) & `002_seed.sql` khi khởi tạo lần đầu (mạng nội bộ `db_net` chỉ mở cho `gateway`)
+- **Redis 7:** Streams broker + TTL refresh token store (`broker_net` nội bộ)
+
+Các profile mở rộng khi đã sẵn sàng service tương ứng:
+```bash
+docker compose --profile workers up -d --build   # Kèm judge-verify-worker (:rw) & judge-worker (:ro)
+docker compose --profile full up -d --build      # Toàn bộ stack gồm cả ai-service (Python FastAPI)
+```
+
+Tự kiểm chứng stack bằng script:
+```bash
+./scripts/verify-dev-stack.sh
+```
+
+---
+
+## Khởi chạy Swagger UI + Prism Mock Server (Tuần 12 Contract Mock)
 
 ```bash
 docker compose -f docker-compose.mock.yml up

@@ -1,0 +1,193 @@
+# AlgoBloom Full-Stack Development Stack (Week 13+)
+#
+# Network Trust Boundaries:
+#   - db_net (internal):     ONLY `postgres` and `gateway` (SOLE DB owner).
+#   - broker_net (internal): ONLY `redis`, `gateway`, and `judge-*` workers
+#                            (untrusted code inside judge workers has ZERO DB access & ZERO internet).
+#   - ai_net:                `gateway` and `ai-service` (internal port 8001, no host port exposed;
+#                            ai-service retains outbound internet for live Gemini calls when MOCK_AI=false).
+#   - public_net:            `gateway` (:8000) and `swagger-ui` (:8080).
+#
+# Quickstart:
+#   Core stack (Postgres + Redis + Gateway + Swagger UI):
+#     docker compose up -d --build
+#   Include Judge Workers (after Issue #8 cptbox verification):
+#     docker compose --profile workers up -d --build
+#   Full stack (after Issue #11 AI Service Dockerfile is merged):
+#     docker compose --profile full up -d --build
+
+services:
+  postgres:
+    build:
+      context: ./services/gateway/migrations
+      dockerfile_inline: |
+        FROM postgres:16-alpine
+        COPY 001_init.sql 002_seed.sql /docker-entrypoint-initdb.d/
+    container_name: algobloom-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-algobloom}
+      POSTGRES_USER: ${POSTGRES_USER:-algobloom}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-algobloom_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - db_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-algobloom} -d ${POSTGRES_DB:-algobloom}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: algobloom-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - broker_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: ./services/gateway
+      dockerfile: Dockerfile
+    container_name: algobloom-gateway
+    environment:
+      PORT: "8000"
+      DATABASE_URL: postgres://${POSTGRES_USER:-algobloom}:${POSTGRES_PASSWORD:-algobloom_dev_password}@postgres:5432/${POSTGRES_DB:-algobloom}?sslmode=disable
+      REDIS_ADDR: redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me}
+      JWT_ACCESS_TTL_SECONDS: ${JWT_ACCESS_TTL_SECONDS:-3600}
+      JWT_REFRESH_TTL_SECONDS: ${JWT_REFRESH_TTL_SECONDS:-604800}
+      AI_SERVICE_URL: http://ai-service:8001
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-only-internal-api-key}
+    ports:
+      - "${GATEWAY_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - public_net
+      - db_net
+      - broker_net
+      - ai_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health | grep -q '\"status\":\"ok\"'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  swagger-ui:
+    build:
+      context: ./contracts
+      dockerfile_inline: |
+        FROM swaggerapi/swagger-ui:v5.17.14
+        COPY openapi.yaml /contracts/openapi.yaml
+    container_name: algobloom-swagger-ui-dev
+    ports:
+      - "${SWAGGER_PORT:-8080}:8080"
+    environment:
+      SWAGGER_JSON: /contracts/openapi.yaml
+      TRY_IT_OUT_ENABLED: "true"
+      PERSIST_AUTHORIZATION: "true"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - public_net
+    restart: unless-stopped
+
+  ai-service:
+    profiles: ["ai", "full"]
+    build:
+      context: ./services/ai-service
+      dockerfile: Dockerfile
+    container_name: algobloom-ai-service
+    environment:
+      PORT: "8001"
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-only-internal-api-key}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      MOCK_AI: ${MOCK_AI:-true}
+      MAX_RETRIES: ${MAX_RETRIES:-3}
+      BASE_BACKOFF_MS: ${BASE_BACKOFF_MS:-1000}
+    networks:
+      - ai_net
+    restart: unless-stopped
+
+  judge-verify-worker:
+    profiles: ["workers", "full"]
+    build:
+      context: ./services/judge-worker
+      dockerfile: Dockerfile
+    container_name: algobloom-judge-verify-worker
+    environment:
+      WORKER_MODE: verify
+      REDIS_ADDR: redis:6379
+      PROBLEMS_DIR: /data/problems
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    volumes:
+      - problems_data:/data/problems:rw
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - broker_net
+    restart: unless-stopped
+
+  judge-worker:
+    profiles: ["workers", "full"]
+    build:
+      context: ./services/judge-worker
+      dockerfile: Dockerfile
+    container_name: algobloom-judge-worker
+    environment:
+      WORKER_MODE: judge
+      REDIS_ADDR: redis:6379
+      PROBLEMS_DIR: /data/problems
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    volumes:
+      - problems_data:/data/problems:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - broker_net
+    restart: unless-stopped
+
+networks:
+  public_net:
+    driver: bridge
+  db_net:
+    driver: bridge
+    internal: true
+  broker_net:
+    driver: bridge
+    internal: true
+  ai_net:
+    driver: bridge
+
+volumes:
+  pg_data:
+  redis_data:
+  problems_data:
