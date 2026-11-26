@@ -82,3 +82,6 @@ redisdata/
 *~
 .DS_Store
 Thumbs.db
+
+# Local AI Agent Context (Never commit)
+GEMINI.md
